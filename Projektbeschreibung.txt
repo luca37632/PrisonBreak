@@ -1,0 +1,9 @@
+Projektbeschreibung – Jump-and-Run im Browser
+
+In meinem Schulpraktikum möchte ich lernen, wie aus meiner Spielidee ein spielbares 2D-Jump-and-Run wird. Ich habe schon eine kleine Website erstellt. Mein Spiel soll im Browser laufen und wie ein Comic aussehen.
+
+Der Spieler steuert einen ausgebrochenen Räuber mit der Tastatur. Er springt über Kisten, sammelt Power-ups ein und versucht, das Ziel zu erreichen, bevor ihn die Polizei erwischt. Die gesamte Geschichte führt vom Gefängnis über einen Banküberfall bis zur Flucht mit einem Jetski.
+
+Mein Ziel für diese Woche ist die erste Map mit drei spielbaren Leveln. Der Weg führt von der Zelle vor das Gefängnis, weiter zum Stadtrand und schließlich zu einem Versteck. Im Ziel gibt es je nach Zeit bis zu drei Sterne. Wer jedes der drei Level in höchstens 90 Sekunden schafft, schaltet eine zweite Figur frei, die höher springt. Der Fortschritt soll im Browser gespeichert werden.
+
+Die Bank-Map, die Flucht zum Hafen und die dritte Figur mit der Fähigkeit zum Zurückspulen sind spätere Erweiterungen.

@@ -1,0 +1,18 @@
+Zeitplan für die Praktikumswoche – Richtwert: rund sieben Stunden pro Tag
+
+Montag, 2. November – Rückblick
+Einführung in die App- und Spieleentwicklung, eigene Spielideen, Regeln und Wochenziel festgelegt. Ersten Tagesbericht geschrieben.
+
+Dienstag, 3. November – Planung und Einstieg
+Etwa 3 Stunden: Projektbeschreibung, Lastenheft, Pflichtenheft und Zeitplan gemeinsam durchgehen. Etwa 3 Stunden: Nach Abschluss der Planung eine Figur im Browser darstellen und per Tastatur bewegen. 1 Stunde für Fragen, Ausprobieren und Tagesbericht.
+
+Mittwoch, 4. November – Erstes spielbares Level
+Etwa 4 Stunden für Sprünge, Boden, Kisten, Kamera und Gefängnistor. 2 Stunden für Verfolgung, Lebensverlust und Checkpoint. 1 Stunde für Probespielen und Bericht.
+
+Donnerstag, 5. November – Weitere Strecken und Fortschritt
+Etwa 3 Stunden für die Wege zum Stadtrand und zur Garage mit derselben Spiellogik. 3 Stunden für Menüs, Zeitmessung, Sterne, Speicherung und Freischaltung. 1 Stunde für Tests und Bericht.
+
+Freitag, 6. November – Fertigstellen und auswerten
+Etwa 2 Stunden für zweite Figur, Power-ups und offene Funktionen. 3 Stunden für Testläufe, Anpassung der Schwierigkeit und Fehlerbehebung. 2 Stunden für Tagesbericht und Abschlussbericht als Anhang.
+
+Falls die Grundlagen länger dauern, hat ein vollständig spielbares Level Vorrang. Danach folgen weitere Strecken mit denselben Regeln. Die Berichte nennen nur tatsächlich erledigte Tätigkeiten.

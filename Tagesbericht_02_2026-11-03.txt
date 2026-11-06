@@ -1,0 +1,5 @@
+Tagesbericht – Dienstag, 3. November 2026
+
+Heute habe ich mit Unterstützung am ersten Level meines Jump-and-Runs gearbeitet. Mein Räuber kann laufen, springen und sein Zellenschloss mit drei richtigen Tastendrücken knacken. Ich habe mir am Code erklären lassen, wie sich das Gitter danach hebt und wie das Rückspul-Item den Räuber und den Polizisten um drei Sekunden zurückversetzt.
+
+Für das Menü habe ich eine Charaktervorschau in der Zelle und eine animierte Fahrt vom Gefängnis in die Stadt mitgestaltet. Dabei habe ich festgelegt, wie sich die Figuren bewegen, wie der Hof nachts beleuchtet wird und welche Musik man auswählen kann. Zum Schluss haben wir die Sternanzeige und drei Schwierigkeitsstufen eingebaut. Auf „Leicht“ läuft der Polizist 30 Sekunden, bevor er sprintet.

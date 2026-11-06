@@ -1,0 +1,16 @@
+# Lokale Testdateien und Browserprofile
+.check-*
+.preview-chrome/
+node_modules/
+
+# Zugangsdaten und lokale Einstellungen
+.env
+.env.*
+!.env.example
+.codex/
+.agents/
+.aws/
+
+# Dateien von Windows
+Thumbs.db
+Desktop.ini

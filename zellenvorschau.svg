@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 350">
+  <defs>
+    <linearGradient id="beton" x2="1" y2="1">
+      <stop stop-color="#b3bab6"/><stop offset="1" stop-color="#758482"/>
+    </linearGradient>
+    <pattern id="fugen" width="94" height="48" patternUnits="userSpaceOnUse">
+      <path d="M0 0h94M0 24h94M20 0v24m46 0v24" fill="none" stroke="#536267" opacity=".24"/>
+    </pattern>
+  </defs>
+  <rect width="280" height="350" fill="url(#beton)"/>
+  <rect width="280" height="266" fill="url(#fugen)"/>
+  <path d="M0 261h280v89H0z" fill="#697675"/>
+  <path d="M0 264h280" stroke="#4f5f60" stroke-width="5"/>
+  <!-- Tageslicht durch ein vergittertes Fenster an der Rückwand. -->
+  <rect x="13" y="29" width="76" height="65" rx="2" fill="#49585d"/>
+  <rect x="19" y="35" width="64" height="52" fill="#c4dce0"/>
+  <path d="M34 34v54m18-54v54m17-54v54M19 61h64" stroke="#58686d" stroke-width="4"/>
+  <path d="M10 94h82" stroke="#718082" stroke-width="6"/>
+  <!-- Pritsche links, Waschbecken und Spiegel rechts. -->
+  <path d="M-8 208h87l-15 21H-8z" fill="#779399"/>
+  <path d="M-6 211h26l-7 11H-6z" fill="#d9ded5"/>
+  <path d="M-4 230h69l16-22m-18 22v43m18-65v40" fill="none" stroke="#415157" stroke-width="6"/>
+  <rect x="219" y="131" width="38" height="49" rx="2" fill="#56676a"/>
+  <rect x="222" y="134" width="32" height="43" fill="#b7cbcf"/>
+  <path d="m225 158 17-19m-10 29 18-20" stroke="#d4e1e0" stroke-width="2"/>
+  <path d="M244 207v-14h-8m5 28v30h17" fill="none" stroke="#55686b" stroke-width="5"/>
+  <path d="M215 205h50q-4 19-25 19t-25-19" fill="#d8dfd9"/>
+  <ellipse cx="240" cy="205" rx="25" ry="4" fill="#a3b7b8"/>
+  <ellipse cx="147" cy="304" rx="53" ry="7" fill="#3d4b4e" opacity=".36"/>
+</svg>

@@ -1,0 +1,5 @@
+Tagesbericht – Mittwoch, 4. November 2026
+
+Heute habe ich am zweiten und dritten Level meines Jump-and-Runs gearbeitet. Für das zweite Level habe ich den Weg vom Gefängnishof bis auf ein Hausdach gestaltet. Im dritten Level führt der Weg über mehrere Dächer bis zu einem Parkhaus. Ich habe die Hindernisse so angepasst, dass man sie beim Spielen besser sehen kann.
+
+Außerdem habe ich das Spielmenü gestaltet. Dort kann man jetzt zwischen vier Figuren mit unterschiedlichen Fähigkeiten wählen und das Aussehen der eigenen Figur verändern.

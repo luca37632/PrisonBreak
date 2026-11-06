@@ -1,0 +1,46 @@
+Lastenheft – Entwurf
+
+Hauptmenü und Levelauswahl
+
+1. Im Hauptmenü kann der Spieler zwischen „Charakter auswählen“ und „Map auswählen“ wählen.
+2. Nach der Auswahl einer Map sind alle drei Level sichtbar. In einer neu freigeschalteten Map ist zunächst nur Level 1 spielbar. Sobald der Spieler das Ziel in Level 1 erreicht, wird Level 2 spielbar. Erreicht er das Ziel in Level 2, wird Level 3 spielbar. Dafür genügt jede Zielzeit.
+3. Bereits gespielte Level können wiederholt werden, um bis zu drei Sterne zu erreichen. Ein schlechterer Versuch ersetzt die bisherige Bestwertung nicht.
+4. Die nächste Map wird freigeschaltet, sobald der Spieler in jedem der drei Level der aktuellen Map drei Sterne erreicht hat.
+5. Gesperrte Level sind mit einem Schloss gekennzeichnet. Unter jedem spielbaren Level zeigen drei Sternsymbole die bisher beste Bewertung. Vor der ersten Zielankunft sind alle drei Sterne leer.
+
+Charakterauswahl
+
+1. Die Auswahl zeigt jede Figur mit ihrer Fähigkeit. Die Startfigur ist von Anfang an spielbar und hat keine besondere Fähigkeit.
+2. Bei gesperrten Figuren steht, wie sie freigeschaltet werden. Die zweite Figur kann höher springen. Sie wird spielbar, sobald alle drei Gefängnislevel mit jeweils drei Sternen abgeschlossen sind.
+3. Klickt der Spieler eine freigeschaltete Figur an, wird sie ausgewählt und das Spiel kehrt ins Hauptmenü zurück. Beim nächsten Levelstart spielt er mit dieser Figur.
+
+Anzeige während des Levels
+
+Die erste Version ist im Browser am Computer mit der Tastatur spielbar. Mit A/D oder den Pfeiltasten links/rechts läuft der Räuber. Mit W, Pfeil nach oben oder der Leertaste springt er. Eine Touchsteuerung für das Handy ist als spätere Erweiterung geplant.
+
+Der Spieler sieht die Strecke von der Seite. Die Kamera folgt dem Räuber und zeigt in Laufrichtung genug Strecke, damit der Spieler die nächste Kiste rechtzeitig vor dem Absprung sieht.
+
+Oben links zeigt eine Stoppuhr die bisherige Levelzeit. Oben rechts zeigen Herzen die verbleibenden Leben an.
+
+Checkpoint
+
+Auch zu Beginn eines Levelversuchs kann der Räuber sofort losrennen. Die Polizei wartet zwei Sekunden, bevor sie die Verfolgung aufnimmt.
+
+In der Mitte jedes Levels steht eine graue Fahne. Sobald die Figur an ihr vorbeiläuft, wird die Fahne grün und der Checkpoint ist aktiv. Verliert der Spieler danach ein Leben und hat noch mindestens ein Leben übrig, setzt er das Level an der grünen Fahne fort. Die Stoppuhr läuft weiter. Bei einem neuen Levelversuch ist die Fahne wieder grau.
+Wird der Räuber vor dem Checkpoint erwischt und hat noch ein Leben übrig, spielt er am Levelanfang weiter. Nach der Aktivierung des Checkpoints spielt er an der grünen Fahne weiter. In beiden Fällen kann er sofort losrennen. Die Polizei wartet zwei Sekunden, bevor sie ihn wieder verfolgt. Die Stoppuhr läuft währenddessen weiter.
+Levelziel der Gefängnis-Map
+
+Level 1 beginnt in der Zelle. Sobald der Räuber durch das Gefängnistor gelaufen ist und draußen steht, ist das Level geschafft.
+Level 2 führt vom Gefängnis bis zum Stadtrand. Dort sind die ersten Häuser und Straßenlaternen zu sehen. Sobald die Figur den Stadtrand erreicht, ist das Level geschafft.
+Level 3 beginnt am Stadtrand und führt zu einer alten Garage in einem Hinterhof. Die Garage ist das Versteck des Räubers. Sobald er hineinläuft, ist das Level geschafft.
+
+Schwierigkeit der Gefängnislevel
+
+Jedes Level muss mit der Startfigur ohne Power-ups in höchstens 1 Minute und 30 Sekunden zu schaffen sein. Genau 1:30 zählt noch als Drei-Sterne-Zeit. Zum Prüfen spielt man jedes Level mit der Startfigur, erreicht ohne eingesammelte Power-ups innerhalb dieser Zeit das Ziel und kontrolliert, dass drei Sterne vergeben werden.
+
+In Level 1 stehen die Kisten weit auseinander, damit der Spieler das Springen üben kann. In Level 2 stehen die Kisten dichter hintereinander. In Level 3 sprintet die Polizei häufiger als in den vorherigen Leveln. Vor jedem Sprint erscheint ein Ausrufezeichen über dem Polizisten und eine kurze Sirene ertönt. Jeder Sprint dauert zwei Sekunden. Dabei ist die Polizei schneller als der Räuber ohne Rakete.
+
+Beim Einsammeln einer Rakete läuft der Räuber sofort drei Sekunden lang schneller als die Polizei, auch während eines Polizeisprints. Danach gilt wieder sein normales Lauftempo.
+
+Die zweite Figur startet ohne Sprungfeder. Sie springt bei jedem Sprung von sich aus höher als die Startfigur. Jede eingesammelte Sprungfeder gibt der aktuellen Figur drei zusätzliche verstärkte Sprünge. Sind sie verbraucht, gilt wieder die eigene Sprunghöhe der Figur.
+

@@ -1,0 +1,5 @@
+Tagesbericht – Montag, 2. November 2026
+
+Heute wurde mir erklärt, wie man eine App oder ein Spiel entwickelt. Danach habe ich meine Ideen für ein eigenes Jump-and-Run aufgeschrieben. Darin flieht ein Räuber vor der Polizei. Ich habe seinen Weg vom Gefängnis bis zum Hafen geplant und festgelegt, wie man die Figur steuert.
+
+Anschließend habe ich die Regeln für Leben, Checkpoints und Zeitsterne festgelegt und mir Power-ups und Fähigkeiten für die Figuren überlegt. Mein Ziel für die Praktikumswoche ist, die drei Gefängnislevel spielbar zu machen. Wer in allen drei Leveln jeweils drei Sterne erreicht, schaltet die zweite Figur frei.

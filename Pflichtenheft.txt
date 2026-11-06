@@ -1,0 +1,18 @@
+Pflichtenheft – Jump-and-Run im Browser
+Entwurf für die Praktikumswoche
+
+1. Aufbau
+HTML enthält die Menüs, Schaltflächen und eine Zeichenfläche für das Spielfeld. CSS legt Farben, Schrift und den Comicstil fest. JavaScript reagiert auf Tastendrücke, bewegt die Figuren und prüft die Spielregeln. Die Grundlagen lernen wir am Beispiel einer laufenden und springenden Figur.
+
+2. Level und Bewegung
+Alle drei Level nutzen dieselbe Spiellogik. Für jedes Level legen wir Start, Kisten, mögliche Fundstellen, Checkpoint, Ziel und Sprintstellen fest. Die Kamera zeigt einen seitlichen Ausschnitt der Strecke und folgt dem Räuber. A/D und die seitlichen Pfeiltasten steuern das Laufen. W, Pfeil nach oben und Leertaste lösen einen Sprung aus. Kisten blockieren den Weg, kosten aber kein Leben.
+
+3. Verfolgung und Gegenstände
+Die Polizei wartet beim Start und nach einem Lebensverlust zwei Sekunden. Vor jedem zweisekündigen Sprint erscheinen ein Ausrufezeichen und eine Sirene ertönt. Bei Kontakt verliert der Räuber ein Leben. Solange Leben übrig sind, läuft die Uhr weiter. Die Figur startet an der aktivierten grünen Fahne oder, wenn die Fahne noch grau ist, am Levelanfang. Nach dem dritten Verlust endet der Versuch ohne Sterne. Ein neuer Versuch beginnt bei null Sekunden mit drei Leben.
+Bei jedem Versuch verteilt das Spiel drei Raketen und drei Sprungfedern auf zufällige erreichbare Fundstellen. Eine Rakete macht den Räuber drei Sekunden lang schneller als die sprintende Polizei. Jede Feder erhöht den Vorrat an verstärkten Sprüngen um drei. Bei jedem Absprung mit Vorrat springt die Figur höher und verbraucht einen Federsprung.
+
+4. Menüs und Fortschritt
+Das Hauptmenü führt zur Charakter- oder Map-Auswahl. Die Levelauswahl zeigt drei Level mit Schloss oder Sternen. Eine Zielankunft schaltet das nächste Level der Map frei. Das Spiel vergibt bis einschließlich 90 Sekunden drei Sterne, bis einschließlich 120 Sekunden zwei und danach einen. Es speichert den jeweils höchsten Sternestand im lokalen Browserspeicher. Daraus ermittelt es die Freischaltungen. Neun Sterne in der Gefängnis-Map schalten die zweite Figur mit höherem Sprung frei. Weitere Maps, die Zeitfigur und die Touchsteuerung sind spätere Erweiterungen.
+
+5. Prüfung
+Wir spielen jedes Level mit der Startfigur ohne Power-ups und prüfen, ob das Ziel in höchstens 90 Sekunden erreichbar ist. Wir testen den Lebensverlust vor und nach der Fahne, die Zeitgrenzen für Sterne und das Wiederöffnen des Spiels im selben Browser. Ein langsamerer Versuch darf die bisherige Bewertung nicht verschlechtern.

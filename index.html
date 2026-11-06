@@ -1,0 +1,3920 @@
+﻿<!doctype html>
+<html lang="de">
+<head>
+  <meta charset="utf-8">
+  <title>PrisonBreak</title>
+  <style>
+    html, body { height: 100%; margin: 0; }
+    body { background: #dce3ea; }
+    main { position: fixed; inset: 16px; }
+    main.im-menue { inset: 0; background: #93acb7 url("menue-rundfahrt.svg?v=20261106-verkehr4") center / cover no-repeat; }
+    main.im-menue.nacht { background-image: url("menue-rundfahrt.svg?v=20261106-verkehr4#nacht"); }
+    main.im-menue > canvas { visibility: hidden; }
+    #spielhof { display: none; }
+    main.aussenlevel #spielhof { display: block; position: absolute; inset: 3px; width: calc(100% - 6px); height: calc(100% - 6px); pointer-events: none; }
+    main.aussenlevel > canvas { position: relative; background: transparent; }
+    main { --stahl: #233540; --papier: #f8f4e9; --signal: #ffba70; }
+    .menue, #einstellungen fieldset {
+      background: linear-gradient(135deg, var(--stahl), #142630);
+      color: var(--papier); border: 1px solid #82949c; border-top: 4px solid var(--signal);
+      border-radius: 10px; box-shadow: 0 8px 28px #101b2660; accent-color: var(--signal);
+    }
+    .menue { position: absolute; inset: 0; margin: auto; width: fit-content; height: fit-content; max-width: 92%; padding: 20px; font: 16px system-ui; }
+    .menue label, .menue button { display: block; margin-top: 10px; }
+    .menue button[hidden] { display: none; }
+    #spielPause { position: absolute; inset: 0; z-index: 5; background: #15232d88; }
+    #spielPause[hidden] { display: none; }
+    #spielPause .menue { min-width: 280px; max-width: 90%; }
+    .menue { max-height: 90%; overflow: auto; box-sizing: border-box; }
+    .kennung { display: block; color: var(--signal); font: bold 12px/1.6 monospace; letter-spacing: .12em; text-transform: uppercase; margin-bottom: 4px; }
+    @media (min-width: 760px) { .im-menue > section.menue { right: auto; left: 3vw; } }
+    .menue h1, .menue h2 { margin: 0 0 8px; }
+    .menue button { width: 100%; padding: 10px 14px; border: 1px solid #778b94; border-radius: 6px; background: #314754; color: var(--papier); font: inherit; text-align: left; cursor: pointer; }
+    #zuLevel, #levelStart, #ausstattung button, #faehigkeiten button { background: var(--signal); border-color: var(--signal); color: #202d32; font-weight: bold; }
+    #faehigkeiten { width: 840px; }
+    .figurenreihe { display: grid; grid-template-columns: repeat(4, minmax(142px, 1fr)); gap: 10px; overflow-x: auto; padding: 3px; }
+    .figurenreihe label { display: flex; flex-direction: column; gap: 7px; padding: 10px; border: 2px solid #657881; border-radius: 7px; background: #283e4a; cursor: pointer; }
+    .figurenreihe label:has(:checked) { border-color: var(--signal); }
+    .figurenreihe label:has(:disabled) { background: #26343c; cursor: default; }
+    .figurenreihe canvas { width: 100%; height: 130px; object-fit: contain; border: 0; background: radial-gradient(ellipse at center, #526975, #253944); }
+    .figurenreihe small { margin-top: auto; color: #ffc995; }
+    .menue button:hover:enabled { filter: brightness(1.13); }
+    #schwierigkeit button[data-stufe], #levelmenue .levelwahl { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    #schwierigkeit .schwierigkeitssterne, .levelsterne { white-space: nowrap; flex-shrink: 0; }
+    #schwierigkeit small { display: block; margin-top: 4px; font-size: 13px; color: #c4d9dd; }
+    #spielername { box-sizing: border-box; width: 100%; padding: 12px; background: #182a35; color: var(--papier); border: 1px solid #82949c; border-radius: 6px; font: inherit; }
+    #ruhm { width: 620px; }
+    #coinShop { width: 1050px; padding-top: 58px; }
+    main.im-menue > #coinShop { left: 0; right: 0; }
+    #hauptmenue { width: 400px; }
+    @media (min-width: 760px) { main.im-menue > #hauptmenue { left: 1.5vw; right: auto; } }
+    .shopkopf { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    #coinGuthaben { margin: 0 0 12px auto; padding: 8px 12px; border: 1px solid #d2ae61; border-radius: 8px; color: #ffe1a0; background: #182a35; font-weight: bold; white-space: nowrap; }
+    #menueCoins { position: absolute; top: 20px; right: 20px; z-index: 1; padding: 10px 16px; border: 1px solid #d2ae61; border-radius: 9px; background: #20323fee; color: #ffe1a0; font: bold 18px system-ui; box-shadow: 0 3px 12px #0004; }
+    #menueCoins[hidden] { display: none; }
+    #coinShop [data-kauf] { display: flex; align-items: center; justify-content: space-between; gap: 24px; }
+    #coinShop .shoppreis { margin-left: auto; flex-shrink: 0; white-space: nowrap; color: #ffd891; font-weight: bold; }
+    main.im-menue > #ruhm { left: 0; right: 0; }
+    .rekordfilter { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 20px; }
+    .rekordfilter label { flex: 1; min-width: 150px; }
+    .rekordfilter select { display: block; width: 100%; margin-top: 6px; padding: 10px; border: 1px solid #82949c; border-radius: 6px; background: #182a35; color: var(--papier); font: inherit; }
+    #ruhm tbody tr:first-child { background: #e4b95722; color: #ffe0a0; font-weight: bold; }
+    #ruhm { padding-top: 58px; }
+    #ruhmZurueck, #shopZurueck { position: absolute; top: 10px; right: 12px; width: auto; margin: 0; padding: 5px 10px; }
+    #hauptmenue #zuRuhm { margin-top: 26px; padding: 16px; background: linear-gradient(135deg, #f5d484, #d4a33d); border: 2px solid #ffe6a3; color: #30250f; font-weight: bold; text-align: center; box-shadow: 0 3px 12px #0004; }
+    #ruhm table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+    #ruhm th, #ruhm td { padding: 8px; text-align: left; border-bottom: 1px solid #536773; overflow-wrap: anywhere; }
+    #ruhm td:last-child { white-space: nowrap; font-variant-numeric: tabular-nums; }
+    .menue button:disabled { cursor: default; background: #263842; color: #b4bfc2; border-style: dashed; }
+    :is(.menue, #einstellungen) :focus-visible { outline: 3px solid #a9ddff; outline-offset: 2px; }
+    .editor { display: flex; align-items: center; gap: 18px; flex-wrap: wrap; }
+    .editor > div { flex: 1 1 220px; min-width: 0; }
+    .editor label { display: grid; grid-template-columns: 1fr minmax(6em, 45%); align-items: center; gap: 12px; }
+    :is(.editor, #einstellungen) :is(input, select) { color-scheme: dark; accent-color: var(--signal); }
+    .editor input, .editor select, #menueSong {
+      box-sizing: border-box; width: 100%; min-width: 0; min-height: 32px; padding: 4px 8px;
+      border: 1px solid #82949c; border-radius: 6px; background-color: #182a35; color: var(--papier); font: inherit;
+    }
+    .editor input:hover, .editor select:hover, #menueSong:hover { border-color: var(--signal); }
+    .editor input[type="color"] { padding: 3px 5px; cursor: pointer; }
+    .editor input[type="color"]::-webkit-color-swatch-wrapper { padding: 1px; }
+    .editor input[type="color"]::-webkit-color-swatch { border: 1px solid #91a1a9; border-radius: 3px; }
+    .editor input[type="color"]::-moz-color-swatch { border: 1px solid #91a1a9; border-radius: 3px; }
+    #nummer { font-variant-numeric: tabular-nums; letter-spacing: .12em; }
+    #vorschau { width: 140px; height: 175px; background: #879492 url("zellenvorschau.svg") center / cover; border: 1px solid #849092; border-radius: 8px; }
+    #einstellungen { position: absolute; right: 12px; bottom: 12px; z-index: 2; color: #213040; font: 16px system-ui; }
+    #einstellungen summary { display: grid; place-items: center; margin-left: auto; width: 44px; height: 44px; border: 2px solid var(--signal); border-radius: 50%; background: var(--stahl); color: var(--papier); cursor: pointer; font-size: 26px; }
+    #einstellungen summary::-webkit-details-marker { display: none; }
+    #einstellungen fieldset { position: absolute; right: 0; bottom: 54px; width: min(230px, 74vw); max-height: calc(100vh - 115px); overflow: auto; margin: 0; padding: 16px; }
+    #einstellungen output { color: var(--signal); font-variant-numeric: tabular-nums; }
+    #einstellungen label { display: grid; grid-template-columns: 1fr auto; gap: 4px 12px; margin-top: 8px; }
+    #einstellungen input { grid-column: span 2; width: 100%; margin-inline: 0; }
+    #menueSong { grid-column: span 2; }
+    #einstellungen input[type="range"] { height: 22px; cursor: pointer; }
+    #einstellungen input[type="checkbox"] { grid-column: 2; width: 20px; height: 20px; margin: 0; cursor: pointer; }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      box-sizing: border-box;
+      border: 3px solid black;
+      background: white;
+    }
+
+    #sprache { grid-column: span 2; width: 100%; padding: 7px; color: var(--papier); background: #182a35; border: 1px solid #82949c; border-radius: 6px; font: inherit; }
+    #tastenOeffnen { margin-top: 12px; padding: 9px; width: 100%; color: var(--papier); background: #314754; border: 1px solid #82949c; border-radius: 6px; font: inherit; cursor: pointer; }
+    #tastenDialog { width: min(720px, 92vw); position: fixed; color: #f8f4e9; background: linear-gradient(135deg,#233540,#142630); border-top-color: #ffba70; }
+    #tastenDialog::backdrop { background: #101b26bb; }
+    .tastenZeile { display: grid; grid-template-columns: minmax(120px,1fr) 2fr; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #536773; }
+    .tastenKnoepfe { display: flex; gap: 8px; flex-wrap: wrap; }
+    .tastenKnoepfe span { display: flex; }
+    #tastenDialog .tastenKnoepfe button { display: inline-block; width: auto; margin: 0; padding: 7px 10px; text-align: center; }
+    #tastenDialog .tasteEntfernen { padding: 7px 5px; color: #ffc995; }
+    #tastenMeldung { min-height: 1.4em; color: #ffc995; }
+  </style>
+</head>
+<body>
+  <main class="im-menue">
+    <svg id="spielhof" viewBox="458 0 800 400" preserveAspectRatio="none" aria-hidden="true">
+      <image width="2840" height="421" preserveAspectRatio="none" href="menue-rundfahrt.svg?v=20261106-verkehr4#spielhof"/>
+    </svg>
+    <canvas width="800" height="400"></canvas>
+    <details id="einstellungen">
+      <summary aria-label="Einstellungen" title="Einstellungen">⚙</summary>
+      <fieldset aria-label="Einstellungen">
+        <strong>Einstellungen</strong>
+        <label for="sprache">Sprache <select id="sprache"><option value="de">Deutsch</option><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option></select></label>
+        <button type="button" id="tastenOeffnen">Tastenbelegung</button>
+        <label for="nachtansicht">Nacht im Menü <input id="nachtansicht" type="checkbox"></label>
+        <label for="menueSong">Menü-Song
+          <select id="menueSong">
+            <option value="stadtlichter">Stadtlichter · Lo-Fi</option>
+            <option value="nachtfahrt">Nachtfahrt · Synthpop</option>
+            <option value="mondschein">Mondschein · Walzer</option>
+            <option value="hinterhof">Hinterhof · Funk</option>
+            <option value="pixel">Pixel-Flucht · Arcade</option>
+            <option value="hafen">Hafenruhe · Ambient</option>
+            <option value="heimweg">Letzte Bahn · Indie-Pop</option>
+            <option value="morgenrot">Morgenrot · Pop-R&amp;B</option>
+            <option value="citygroove">Stadtgroove · Disco</option>
+            <option value="skyline">Skyline · House</option>
+            <option value="fluchtplan">Fluchtplan · Synthwave</option>
+          </select>
+        </label>
+        <label for="musik">Musik <output id="musikWert" for="musik"></output><input id="musik" type="range" min="0" max="100" value="50"></label>
+        <label for="effekte">Geräusche <output id="effekteWert" for="effekte"></output><input id="effekte" type="range" min="0" max="100" value="100"></label>
+      </fieldset>
+    </details>
+    <output id="menueCoins" aria-label="Dein Coin-Guthaben">0 Coins</output>
+    <section class="menue" id="hauptmenue">
+      <span class="kennung">Zellentrakt / Hauptmenü</span>
+      <h1>PrisonBreak</h1>
+      <button id="zuLevel">Level auswählen</button>
+      <button id="zuFaehigkeiten">Fähigkeit auswählen</button>
+      <button id="zuFigur">Aussehen bearbeiten</button>
+      <button id="zuShop">Coin-Shop</button>
+      <button id="zuRuhm">Hall of Fame</button>
+    </section>
+    <section class="menue" id="coinShop" hidden>
+      <button id="shopZurueck" aria-label="Coin-Shop schließen" title="Schließen (Escape)">Esc</button>
+      <div class="shopkopf"><div>
+      <span class="kennung">Deine gesammelten Münzen</span>
+      <h2>Coin-Shop</h2>
+      </div><p id="coinGuthaben" aria-live="polite"></p></div>
+      <p>Ein Vorteil pro Runde. Dein Kauf gilt für den nächsten gewerteten Lauf und wird beim Start verbraucht. Bei einem Neustart brauchst du einen neuen Kauf.</p>
+      <p>Von kleinen Hilfen bis zu starken Vorteilen für Rekordversuche:</p>
+      <button data-kauf="herz" data-titel="Zusätzliches Herz · Nur Level 1–3"><span class="shoptitel">Zusätzliches Herz · Nur Level 1–3</span><span class="shoppreis"></span></button>
+      <button data-kauf="sprung" data-titel="Sprungschuhe · Alle Sprünge etwas höher"><span class="shoptitel">Sprungschuhe · Alle Sprünge etwas höher</span><span class="shoppreis"></span></button>
+      <button data-kauf="rueckspulen" data-titel="Rettungsuhr · Einmal zusätzlich 3 Sekunden zurückspulen ({rewind})"><span class="shoptitel">Rettungsuhr · Einmal zusätzlich 3 Sekunden zurückspulen ({rewind})</span><span class="shoppreis"></span></button>
+      <button data-kauf="reserve" data-titel="Reserve-Rakete · Einmal mit {rocket} für 3 Sekunden zünden"><span class="shoptitel">Reserve-Rakete · Einmal mit {rocket} für 3 Sekunden zünden</span><span class="shoppreis"></span></button>
+      <button data-kauf="rakete" data-titel="Rakete hält eine Sekunde länger"><span class="shoptitel">Rakete hält eine Sekunde länger</span><span class="shoppreis"></span></button>
+      <p id="shopMeldung" role="status"></p>
+      <button id="kaufStornieren" hidden>Kauf zurücknehmen · Coins zurück</button>
+    </section>
+    <form class="menue" id="namenswahl" hidden>
+      <span class="kennung">Dein nächster Lauf</span>
+      <h2>Wer spielt?</h2>
+      <p id="namenshinweis"></p>
+      <label for="spielername">Spielername</label>
+      <input id="spielername" maxlength="24" required autocomplete="nickname" placeholder="Dein Name">
+      <button type="submit">Mit diesem Namen starten</button>
+      <button type="button" id="neuerName">Neuen Namen eingeben</button>
+      <button type="button" id="nameZurueck">Zurück</button>
+    </form>
+    <section class="menue" id="ruhm" hidden>
+      <button id="ruhmZurueck" aria-label="Hall of Fame schließen" title="Schließen (Escape)">Esc</button>
+      <span class="kennung">Distanzrekorde / Auf diesem Browser</span>
+      <h2>Hall of Fame</h2>
+      <p>Top 10 der endlosen Flucht. Die größte Entfernung steht auf Platz 1. Dein Name gehört zu deinem Spielerprofil. Ein neuer Name benennt deinen Eintrag um.</p>
+      <div id="rekordliste"></div>
+    </section>
+    <section class="menue" id="levelmenue" hidden>
+      <span class="kennung">Fluchtplan / Welt 01</span>
+      <h2>Gefängnis · Levelauswahl</h2>
+      <button id="endlosLevel">∞ · Endlose Flucht · Distanzrekord</button>
+      <p>Jede geschaffte Schwierigkeit bringt einen Levelstern.</p>
+      <button id="levelStart" class="levelwahl">1 · Aus der Zelle zum Innenhof <span class="levelsterne">☆☆☆</span></button>
+      <button id="levelZwei" class="levelwahl">2 · Zum Stadtrand <span class="levelsterne">☆☆☆</span></button>
+      <button id="levelDrei" class="levelwahl"><span id="dachTitel">3 · Dachstrecke ausprobieren</span><span class="levelsterne">☆☆☆</span></button>
+      <button id="zurueck">Zurück zum Hauptmenü</button>
+    </section>
+    <section class="menue" id="schwierigkeit" hidden>
+      <span class="kennung">Level 01 / Verfolgung</span>
+      <h2>Schwierigkeit wählen</h2>
+      <p>Wie schwierig soll die Verfolgung sein?</p>
+      <button data-stufe="leicht"><span>Leicht · 30 Sekunden<small></small></span><span class="schwierigkeitssterne">☆☆☆</span></button>
+      <button data-stufe="mittel"><span>Mittel · 20 Sekunden<small></small></span><span class="schwierigkeitssterne">☆☆☆</span></button>
+      <button data-stufe="schwer"><span>Schwer · 10 Sekunden<small></small></span><span class="schwierigkeitssterne">☆☆☆</span></button>
+      <button id="zurLevelwahl">Zurück zur Levelauswahl</button>
+    </section>
+    <form class="menue" id="faehigkeiten" hidden>
+      <span class="kennung">Häftlingsakte / Fähigkeiten</span>
+      <h2 id="faehigkeitTitel">Fähigkeit auswählen</h2>
+      <div class="figurenreihe" role="radiogroup" aria-labelledby="faehigkeitTitel">
+        <label><input type="radio" name="charakter" value="raeuber" checked><canvas width="130" height="130" aria-hidden="true"></canvas><strong>Räuber</strong><span>Startet mit drei Herzen und springt normal hoch.</span><small></small></label>
+        <label><input type="radio" name="charakter" value="springer"><canvas width="130" height="130" aria-hidden="true"></canvas><strong>Hochspringer</strong><span>Springt höher. Mit der Sprungfeder kommst du noch höher.</span><small></small></label>
+        <label><input type="radio" name="charakter" value="ausdauer"><canvas width="130" height="130" aria-hidden="true"></canvas><strong>Ausdauerräuber</strong><span>Startet mit vier Herzen. Du kannst einen Treffer mehr einstecken.</span><small></small></label>
+        <label><input type="radio" name="charakter" value="zeit"><canvas width="130" height="130" aria-hidden="true"></canvas><strong>Zeitläufer</strong><span>Drücke {rewind}, um zweimal pro Level je drei Sekunden zurückzuspulen.</span><small></small></label>
+      </div>
+      <fieldset><legend>Mit welchem Skin möchtest du spielen?</legend>
+        <label><input type="radio" name="skinTyp" value="figur" checked> Vorgegebener Skin der Figur</label>
+        <label><input type="radio" name="skinTyp" value="eigen"> Mein eigener Skin</label>
+      </fieldset>
+      <button>Auswahl übernehmen und zurück</button>
+    </form>
+    <form class="menue" id="ausstattung" hidden>
+      <span class="kennung">Häftlingsakte / Profil</span>
+      <h2>Aussehen bearbeiten</h2>
+      <div class="editor"><canvas id="vorschau" width="280" height="350" aria-label="Dein Räuber in seiner Gefängniszelle"></canvas><div>
+      <label>Hautfarbe <input id="haut" type="color" value="#c99064"></label>
+      <label>Frisur <select id="frisur">
+        <option value="kurz">Kurz</option><option value="lang">Lang</option>
+        <option value="locken">Locken</option><option value="iro">Irokesenschnitt</option>
+        <option value="zopf">Pferdeschwanz</option><option value="kahl">Glatze</option>
+      </select></label>
+      <label>Haarfarbe <input id="haare" type="color" value="#302b30"></label>
+      <label>Bart <select id="bart"><option value="ohne">Ohne Bart</option><option value="schnauzer">Schnauzbart</option><option value="voll">Vollbart</option></select></label>
+      <label>Augenfarbe <input id="augen" type="color" value="#302b30"></label>
+      <label>Gesichtsausdruck <select id="ausdruck">
+        <option value="neutral">Neutral</option>
+        <option value="grinsen">Grinsend</option>
+        <option value="ernst">Entschlossen</option>
+        <option value="erstaunt">Überrascht</option>
+      </select></label>
+      <label>Halskette <select id="halskette">
+        <option value="ohne">Keine Kette</option>
+        <option value="gold">Feine Goldkette</option>
+        <option value="silber">Feine Silberkette</option>
+        <option value="panzer">Dicke goldene Panzerkette</option>
+        <option value="anhaenger">Silberkette mit Blitzanhänger</option>
+      </select></label>
+      <label>Anzugfarbe <input id="farbe" type="color" value="#ee812f"></label>
+      <label>Schuhfarbe <input id="schuhe" type="color" value="#302b30"></label>
+      <label>Häftlingsnummer <input id="nummer" value="17" maxlength="3" size="3" inputmode="numeric" pattern="[0-9]{1,3}" required title="Eine bis drei Ziffern"></label>
+      </div></div>
+      <button>Speichern und zurück</button>
+    </form>
+    <section class="menue" id="lebenspause" aria-labelledby="trefferTitel" hidden>
+      <h2 id="trefferTitel">Ein Herz verloren</h2>
+      <p id="restHerzen"></p>
+      <button id="weiterspielen">Vom letzten Checkpoint weiter</button>
+      <button id="abbrechen">Zurück zur Levelauswahl</button>
+    </section>
+    <div id="spielPause" hidden>
+      <section class="menue" role="dialog" aria-modal="true" aria-labelledby="pauseTitel">
+        <span class="kennung">Pause</span>
+        <h2 id="pauseTitel">Kurz durchatmen</h2>
+        <p>Deine Zeit bleibt stehen.</p>
+        <button id="pauseWeiter">Weiterspielen · {pause}</button>
+        <button id="pauseVerlassen">Runde verlassen · Levelauswahl</button>
+      </section>
+    </div>
+    <button class="menue" id="nachZiel" style="top:45%" hidden>Zur Levelauswahl</button>
+
+    <dialog id="tastenDialog" class="menue" aria-labelledby="tastenTitel">
+      <h2 id="tastenTitel">Tastenbelegung</h2>
+      <p>Klicke auf eine Taste und drücke die gewünschte neue Taste. Escape bricht die Änderung ab.</p>
+      <div id="tastenListe"></div>
+      <p id="tastenMeldung" role="status" data-i18n-dynamisch></p>
+      <button id="tastenReset" type="button">Standardtasten wiederherstellen</button>
+      <button id="tastenFertig" type="button">Fertig</button>
+    </dialog>
+  </main>
+  <script src="spielerprofil.js"></script>
+  <script src="weitere-sprachen.js"></script>
+  <script src="sprache.js"></script>
+  <script src="steuerung.js"></script>
+  <script>
+  const hofEbene = document.getElementById("spielhof");
+  const spielfeld = document.querySelector("canvas");
+  const stift = spielfeld.getContext("2d");
+let x = 40;
+let level = 1;
+let proberunde = false;
+const figurMassstab = 1.5;
+const figurBreite = 24 * figurMassstab;
+const figurHoehe = 36 * figurMassstab;
+const bodenY = 336 - figurHoehe;
+const duckHoehe = 43;
+const durchfahrtHoehe = 46;
+let geduckt = false;
+function kopfY() {
+  return geduckt ? y + figurHoehe - duckHoehe : y;
+}
+let laufStrecke = 0;
+let blickrichtung = 1;
+let y = bodenY;
+let springt = false;
+// Positionen entlang der Fluchtstrecke, gemessen ab dem Start.
+const moebelTypen = {
+  parkauto: { breite: 112, hoehe: 48 },
+  verkehrskegel: { breite: 34, hoehe: 37 },
+  hydrant: { breite: 32, hoehe: 46 },
+  kiste: { breite: 72, hoehe: 64 },
+  kamin: { breite: 35, hoehe: 45 },
+  luefter: { breite: 58, hoehe: 34 },
+  rohr: { breite: 48, hoehe: 29 },
+  bett: { breite: 86, hoehe: 32 },
+  tisch: { breite: 76, hoehe: 49 },
+  bank: { breite: 62, hoehe: 24 },
+  automat: { breite: 44, hoehe: 74 },
+  spind: { breite: 35, hoehe: 68 },
+  waeschewagen: { breite: 59, hoehe: 39 },
+  waschmaschine: { breite: 48, hoehe: 47 },
+  buecherregal: { breite: 55, hoehe: 66 },
+  werkzeugkoffer: { breite: 39, hoehe: 22 },
+  bauarbeiter: { breite: 26, hoehe: 56 },
+  bauzaun: { breite: 74, hoehe: 66 },
+  baustellenbake: { breite: 56, hoehe: 43 },
+  muelltonne: { breite: 36, hoehe: 50 },
+  reifenstapel: { breite: 48, hoehe: 33 },
+  baucontainer: { breite: 96, hoehe: 117 },
+  kistenstapel: { breite: 80, hoehe: 136 }
+};
+let levelBreite = 17680;
+let endlos = false;
+let endlosWeite = 40;
+let endlosErzeugtBis = 450;
+let endlosHindernisse = 0;
+let endlosAutoBei = 6;
+let endlosBaustelleBei = 3;
+let endlosPlattformBei = 6;
+let endlosGespeichert = false;
+let endlosBestweite = 0;
+let endlosRekordGemeldet = false;
+let endlosRekordBis = 0;
+function meterText(pixel) { return (Math.max(0, pixel - 40) / 120).toFixed(1).replace(".", sprache === "en" ? "." : ",") + " m"; }
+function endlosStufe() { return 1 + Math.floor(Math.max(0, endlosWeite - 40) / 2500); }
+function leseEndlosRekorde() {
+  try {
+    const daten = JSON.parse(localStorage.getItem("endlosRekorde-v1") || "[]");
+    return Array.isArray(daten) ? profilRekorde(daten.filter(e => e && typeof e.name === "string" &&
+      Number.isFinite(e.weite) && e.weite > 40 && Number.isFinite(e.zeit) && e.zeit >= 0)) : [];
+  } catch { return []; }
+}
+function speichereEndlosRekord() {
+  if (!endlos || endlosGespeichert || endlosWeite <= 40) return;
+  const daten = leseEndlosRekorde();
+  const zeit = Math.max(0, Math.round((spielt ? performance.now() : !document.getElementById("spielPause").hidden ? escPauseSeit : pauseSeit) - startZeit));
+  const bisher = daten.find(e => e.spielerId === spielerProfil.id);
+  const weite = Math.round(endlosWeite * 10) / 10;
+  if (!bisher) daten.push({ spielerId: spielerProfil.id, name: spielerName, weite, zeit });
+  else if (weite > bisher.weite || (weite === bisher.weite && zeit < bisher.zeit)) Object.assign(bisher, { weite, zeit });
+  try { localStorage.setItem("endlosRekorde-v1", JSON.stringify(daten)); endlosGespeichert = true; } catch {}
+}
+function erweitereEndlosStrecke() {
+  while (endlosErzeugtBis < x + 2600) {
+    const stufeHier = 1 + Math.floor(endlosErzeugtBis / 2500);
+    if (endlosHindernisse >= endlosPlattformBei) {
+      // Die letzte Arbeitsbuehne ist zu hoch fuer einen Sprung vom Boden.
+      // Deshalb fuehrt der Weg ueber zwei, spaeter gelegentlich drei Stufen.
+      const anzahl = stufeHier >= 5 && Math.random() < 0.4 ? 3 : 2;
+      const start = endlosErzeugtBis;
+      for (let i = 0; i < anzahl; i++) {
+        const hoehe = 60 * (i + 1);
+        plattformen.push({ x: start + i * 128, breite: i === anzahl - 1 ? 104 : 80,
+          oben: bodenY + figurHoehe - hoehe, hoehe: i === anzahl - 1 ? hoehe : undefined,
+          endlosBuehne: true });
+      }
+      const letzte = plattformen[plattformen.length - 1];
+      fundstuecke.push({ art: "Rakete", x: letzte.x + 39, y: letzte.oben - 36 });
+      endlosErzeugtBis = letzte.x + letzte.breite + 340;
+      endlosHindernisse++;
+      endlosPlattformBei = endlosHindernisse + 7 + Math.floor(Math.random() * 4);
+      continue;
+    }
+    // Mit der Strecke werden die Abstaende kleiner und Baustellen haeufiger.
+    const auswahl = stufeHier < 4
+      ? ["muelltonne", "baustellenbake", "verkehrskegel", "hydrant", "bank"]
+      : ["muelltonne", "baustellenbake", "bauzaun", "hydrant", "reifenstapel"];
+    // Werkzeug liegt nur nach einer Baustellenabsperrung auf dem Weg.
+    const vorher = einrichtung[einrichtung.length - 1]?.[1];
+    if (vorher === "baustellenbake") auswahl.push("werkzeugkoffer");
+    const typen = auswahl.filter(typ => typ !== vorher);
+    const autoFaellig = endlosHindernisse >= endlosAutoBei;
+    const baustelleFaellig = !autoFaellig && endlosHindernisse >= endlosBaustelleBei;
+    const typ = autoFaellig ? "parkauto" : baustelleFaellig ? "bauzaun" : typen[Math.floor(Math.random() * typen.length)];
+    if (autoFaellig) {
+      endlosAutoBei = endlosHindernisse + 7 + Math.floor(Math.random() * 4);
+      const letztes = einrichtung[einrichtung.length - 1];
+      if (letztes) endlosErzeugtBis = Math.max(endlosErzeugtBis, letztes[0] + moebelTypen[letztes[1]].breite + 300);
+    }
+    const links = endlosErzeugtBis;
+    einrichtung.push([links, typ]);
+    let abschnittEnde = links + moebelTypen[typ].breite;
+    if (baustelleFaellig) {
+      // Drei Spruenge: Zaun, Arbeiter mit Werkzeug und die zweite Absperrung.
+      // Alle Hoehen sind auch mit dem normalen Raeuber erreichbar.
+      const arbeitsplatz = links + 190;
+      const letzterZaun = links + 420 + Math.floor(Math.random() * 50);
+      einrichtung.push([arbeitsplatz, "werkzeugkoffer"],
+        [arbeitsplatz + moebelTypen.werkzeugkoffer.breite, "bauarbeiter"],
+        [letzterZaun, stufeHier < 3 ? "baustellenbake" : "bauzaun"]);
+      abschnittEnde = letzterZaun + (stufeHier < 3 ? moebelTypen.baustellenbake.breite : moebelTypen.bauzaun.breite);
+      endlosBaustelleBei = endlosHindernisse + Math.max(3, 6 - Math.floor(stufeHier / 3)) + Math.floor(Math.random() * 2);
+    }
+    endlosHindernisse++;
+    const frei = abschnittEnde + 65;
+    if (endlosHindernisse % 6 === 0) fundstuecke.push({ x: frei, art: "Rakete" });
+    else if (endlosHindernisse % 9 === 0) fundstuecke.push({ x: frei, art: "Sprungfeder" });
+    if (endlosHindernisse % 3 === 0 && Math.random() < 0.45)
+      muenzen.push({ x: frei + 12, y: bodenY + figurHoehe - 25, gesammelt: false });
+    // Sichtbarer Anlauf und freie Abschnitte bleiben auch in spaeten Stufen erhalten.
+    const abstand = typ === "parkauto" ? 320 : baustelleFaellig ? 240 : Math.max(170, 260 - (stufeHier - 1) * 15);
+    const freieStrecke = endlosHindernisse % 6 === 0 ? 140 : 0;
+    endlosErzeugtBis = abschnittEnde + abstand + freieStrecke + Math.floor(Math.random() * 80);
+  }
+  // Nur die Umgebung und genug Rückweg für drei Sekunden Zurückspulen behalten.
+  const grenze = endlosWeite - 3200;
+  while (einrichtung.length && einrichtung[0][0] < grenze) einrichtung.shift();
+  while (plattformen.length && plattformen[0].x + plattformen[0].breite < grenze) plattformen.shift();
+  while (muenzen.length && muenzen[0].x < grenze) muenzen.shift();
+  while (fundstuecke.length && fundstuecke[0].x < grenze) {
+    fundstuecke.shift();
+    for (const zustand of verlauf) { zustand.gesammelt.shift(); zustand.raketenSchritte.shift(); }
+  }
+  levelBreite = endlosErzeugtBis + 3000;
+  torX = levelBreite - torBreite;
+}
+const torBreite = 88;
+let torX = levelBreite - torBreite;
+const einrichtung = [];
+let startZeit = 0;
+let maxLeben = 3;
+let leben = maxLeben;
+let spielt = false;
+let checkpointAktiv = false;
+const farbe = document.querySelector("#farbe");
+const nummer = document.querySelector("#nummer");
+const [haut, frisur, haare, augen, schuhe] = ["haut", "frisur", "haare", "augen", "schuhe"].map(id => document.getElementById(id));
+const bart = document.getElementById("bart");
+const halskette = document.getElementById("halskette");
+const ausdruck = document.getElementById("ausdruck");
+const aussehen = [haut, frisur, haare, augen, schuhe, bart, halskette, ausdruck];
+const charakterWahl = document.getElementById("faehigkeiten").elements.namedItem("charakter");
+const skinWahl = document.getElementById("faehigkeiten").elements.namedItem("skinTyp");
+const figurenSkins = {
+  raeuber: { outfit: "raeuber", farbe: "#dc752e", haut: "#bb815b", frisur: "kurz", haare: "#382820", augen: "#46382f", bart: "ohne", schuhe: "#343b41", nummer: "17" },
+  springer: { outfit: "springer", farbe: "#218f85", haut: "#794c36", frisur: "lang", haare: "#261f25", augen: "#593e2e", bart: "ohne", schuhe: "#8df2d8", nummer: "28" },
+  zeit: { outfit: "zeit", farbe: "#655298", haut: "#deaf8b", frisur: "kurz", haare: "#cbc5bd", augen: "#537080", bart: "schnauzer", schuhe: "#403957", nummer: "03" },
+  ausdauer: { outfit: "ausdauer", farbe: "#a94149", haut: "#ac7351", frisur: "kahl", haare: "#503329", augen: "#413527", bart: "voll", schuhe: "#423430", nummer: "44" }
+};
+function eigenerSkin() {
+  return { outfit: "raeuber", farbe: farbe.value, haut: haut.value, frisur: frisur.value, haare: haare.value,
+           augen: augen.value, bart: bart.value, schuhe: schuhe.value, nummer: nummer.value,
+           halskette: halskette.value, ausdruck: ausdruck.value };
+}
+try {
+  for (const feld of aussehen) feld.value = localStorage.getItem("raeuber-" + feld.id) || feld.value;
+  farbe.value = localStorage.getItem("raeuberFarbe") || farbe.value;
+  nummer.value = localStorage.getItem("raeuberNummer") || nummer.value;
+} catch {}
+let raketeBis = 0;
+let federSpruenge = 0;
+const shopPreise = { herz: 35, sprung: 45, rueckspulen: 60, reserve: 75, rakete: 90 };
+const alteShopPreise = { herz: 8, magnet: 4, rakete: 6, sprung: 7, reserve: 8, rueckspulen: 6 };
+let coinKonto = { coins: 0, vorgemerkt: null, version: 2 };
+let rundenVorteil = null;
+let reserveRakete = false;
+function rundenVorteilText() {
+  const texte = {
+    herz: t("Zusätzliches Herz · automatisch beim Start"),
+    rakete: t("Längere Raketen · automatisch beim Einsammeln"),
+    sprung: t("Sprungschuhe · Springen mit {jump}"),
+    reserve: reserveRakete ? t("Reserve-Rakete · {rocket} zum Zünden") : t("Reserve-Rakete · bereits verbraucht"),
+    rueckspulen: t("Rettungsuhr · {rewind} zum Zurückspulen")
+  };
+  return texte[rundenVorteil] || "";
+}
+function zuendeReserveRakete(jetzt) {
+  if (!reserveRakete) return;
+  reserveRakete = false;
+  raketeBis = Math.max(jetzt, raketeBis) + 3000;
+}
+try {
+  const alt = JSON.parse(localStorage.getItem("coinKonto") || "null");
+  if (alt && Number.isSafeInteger(alt.coins) && alt.coins >= 0) {
+    coinKonto.coins = alt.coins;
+    if (alt.version === 2 && alt.vorgemerkt === "magnet") {
+      coinKonto.coins += Number.isSafeInteger(alt.bezahlt) && alt.bezahlt >= 0 ? alt.bezahlt : alteShopPreise.magnet;
+      coinKonto.vorgemerkt = null;
+      coinKonto.bezahlt = 0;
+      localStorage.setItem("coinKonto", JSON.stringify(coinKonto));
+    }
+    else if (alt.version === 2) {
+      coinKonto.vorgemerkt = Object.hasOwn(shopPreise, alt.vorgemerkt) ? alt.vorgemerkt : null;
+      coinKonto.bezahlt = coinKonto.vorgemerkt ? (Number.isSafeInteger(alt.bezahlt) && alt.bezahlt >= 0 ? alt.bezahlt : alteShopPreise[coinKonto.vorgemerkt]) : 0;
+    }
+    else {
+      // Alte dauerhafte Käufe zum ursprünglichen Preis erstatten.
+      for (const [art, preis] of Object.entries({ herz: 150, magnet: 80, rakete: 120 }))
+        if (alt.gekauft?.[art] === true) coinKonto.coins += preis;
+      localStorage.setItem("coinKonto", JSON.stringify(coinKonto));
+    }
+  }
+} catch {}
+function starteRundenVorteil() {
+  rundenVorteil = null;
+  if (proberunde || !coinKonto.vorgemerkt) return;
+  if (endlos && coinKonto.vorgemerkt === "herz") return;
+  const art = coinKonto.vorgemerkt;
+  const neu = { ...coinKonto, vorgemerkt: null, bezahlt: 0 };
+  try {
+    localStorage.setItem("coinKonto", JSON.stringify(neu));
+    coinKonto = neu;
+    rundenVorteil = art;
+  } catch {}
+}
+const muenzen = [];
+let rundenCoins = 0;
+let coinsAusgezahlt = true;
+function platziereMuenzen() {
+  muenzen.length = 0;
+  const anzahl = 2 + Math.floor(Math.random() * 5);
+  const plaetze = [];
+  for (let abschnitt = 500; abschnitt < torX - 350; abschnitt += 650) {
+    const start = abschnitt + Math.random() * 260;
+    const p = freierStandort(start, Math.min(start + 300, torX - 350));
+    if (p) plaetze.push({ x: p.x + 12, y: p.oben - (Math.random() < 0.35 ? 105 : 25), gesammelt: false });
+  }
+  for (let i = plaetze.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [plaetze[i], plaetze[j]] = [plaetze[j], plaetze[i]];
+  }
+  muenzen.push(...plaetze.slice(0, anzahl));
+}
+function sammleMuenzen() {
+  const radius = 10;
+  for (const m of muenzen) {
+    const nahX = Math.max(x, Math.min(m.x, x + figurBreite));
+    const nahY = Math.max(kopfY(), Math.min(m.y, y + figurHoehe));
+    if (!m.gesammelt && Math.hypot(m.x - nahX, m.y - nahY) < radius) {
+      m.gesammelt = true;
+      rundenCoins++;
+    }
+  }
+}
+function zahleRundenCoins() {
+  if (coinsAusgezahlt) return;
+  if (proberunde) { coinsAusgezahlt = true; return; }
+  const neu = { ...coinKonto, coins: coinKonto.coins + rundenCoins };
+  try {
+    localStorage.setItem("coinKonto", JSON.stringify(neu));
+    coinKonto = neu;
+    coinsAusgezahlt = true;
+  } catch {}
+}
+function zeichneMuenzen(kameraX) {
+  stift.save();
+  for (const m of muenzen) {
+    if (m.gesammelt || m.x < kameraX - 10 || m.x > kameraX + spielfeld.width + 10) continue;
+    stift.fillStyle = "#ffc94a";
+    stift.strokeStyle = "#986215";
+    stift.lineWidth = 2;
+    stift.beginPath(); stift.ellipse(m.x, m.y, 7, 10, 0, 0, Math.PI * 2); stift.fill(); stift.stroke();
+    stift.fillStyle = "#fff0a1"; stift.fillRect(m.x - 1, m.y - 5, 2, 10);
+  }
+  stift.restore();
+}
+let streckenSaat = 1;
+function streckenZufall() {
+  streckenSaat = (Math.imul(streckenSaat, 1664525) + 1013904223) >>> 0;
+  return streckenSaat / 4294967296;
+}
+const abkuerzungen = [];
+let durchgangBis = 0;
+function freierStandort(von, bis) {
+  for (let links = von; links < Math.min(bis, torX - 180); links += 24) {
+    const dach = level === 3 ? daecher.find(d => links >= d.x + 25 && links + figurBreite <= d.x + d.breite - 25) : null;
+    if (level === 3 && !dach) continue;
+    const oben = dach ? dach.oben : bodenY + figurHoehe;
+    const flaechen = [...plattformen, ...dachFlaechen,
+      ...einrichtung.map(([x, typ]) => ({ x, breite: moebelTypen[typ].breite,
+        oben: bodenY + figurHoehe - moebelTypen[typ].hoehe, hoehe: moebelTypen[typ].hoehe }))];
+    if (flaechen.some(f => links - 10 < f.x + f.breite && links + figurBreite + 10 > f.x &&
+        oben > f.oben && oben - figurHoehe < f.oben + (f.hoehe ?? 10))) continue;
+    if (sperren.some(g => Math.abs(g.gitterX - links) < 80)) continue;
+    return { x: links, oben };
+  }
+  return null;
+}
+function platziereAbkuerzungen() {
+  abkuerzungen.length = 0;
+  for (const [von, bis] of [[0.08, 0.22], [0.33, 0.47], [0.58, 0.74]]) {
+    const plaetze = [];
+    for (let links = Math.floor(torX * von); links < torX * bis; links += 110) {
+      const eingang = freierStandort(links, links + 100);
+      if (!eingang) continue;
+      const ausgang = freierStandort(eingang.x + 1000, eingang.x + 1700);
+      if (ausgang) plaetze.push({ eingang, ausgang });
+    }
+    if (plaetze.length) abkuerzungen.push(plaetze[Math.floor(Math.random() * plaetze.length)]);
+  }
+}
+const fundstuecke = [];
+function abkuerzungAmSpieler() {
+  return abkuerzungen.find(weg => geduckt && Math.abs(y + figurHoehe - weg.eingang.oben) < 8 &&
+    Math.abs(x - weg.eingang.x) < 32);
+}
+function nutzeAbkuerzung(jetzt) {
+  const weg = abkuerzungAmSpieler();
+  if (!weg) return false;
+
+  const vorsprung = Math.max(90, Math.min(220, x - polizeiX));
+  x = weg.ausgang.x;
+  y = weg.ausgang.oben - figurHoehe;
+  springt = geduckt = false;
+  tempoY = 0;
+  polizeiX = x - vorsprung;
+  durchgangBis = jetzt + 700;
+  polizeiStart = durchgangBis + 1200;
+  planeSprint(polizeiStart);
+  schuss = flugobjekt = null;
+  zielwarnungBis = 0;
+  naechsterSchuss = durchgangBis + schussAbstand[stufe];
+  naechsterFlug = durchgangBis + 6000;
+  if (!endlos && x >= checkpointX) checkpointAktiv = true;
+  verlauf.length = 0;
+  leereSpielTasten();
+  spieleDurchgang();
+  return true;
+}
+function zeichneAbkuerzungen(kameraX) {
+  stift.save();
+  for (const weg of abkuerzungen) for (const p of [weg.eingang, weg.ausgang]) {
+    if (p.x < kameraX - 60 || p.x > kameraX + spielfeld.width) continue;
+    // Nur eine schwache Fuge, keine auffällige Tür oder Umrandung.
+    stift.globalAlpha = level === 1 ? 0.2 : 0.9;
+    stift.strokeStyle = level === 1 ? "#505b60" : "#e2cba5";
+    stift.lineWidth = level === 1 ? 1 : 2.5;
+    stift.beginPath();
+    stift.moveTo(p.x + 3, p.oben - 3);
+    stift.lineTo(p.x + 28, p.oben - 3);
+    stift.lineTo(p.x + 28, p.oben - 15);
+    stift.stroke();
+  }
+  stift.restore();
+}
+const fundY = bodenY + figurHoehe - 38;
+let uhrBereit = false;
+let uhrVerbraucht = false;
+let zeitLadungen = 0;
+
+// In freien Möbellücken schweben erreichbare Metallplattformen.
+const plattformen = [];
+const sperren = [];
+let checkpointX = Math.floor(torX / 2);
+const daecher = [];
+const dachFlaechen = [];
+let checkpointBoden = bodenY + figurHoehe;
+function platziereRaketenplattformen(start, boden) {
+  const folge = [];
+  const anzahl = stufe === "schwer" ? 2 : 1;
+  const hoehe = stufe === "mittel" ? 84 : 60;
+  for (let n = 0; n < anzahl; n++) {
+    const p = { x: start + n * 88, breite: stufe === "mittel" ? 38 : 52,
+                oben: boden - (n + 1) * hoehe, raketenStufe: n + 1 };
+    folge.push(p);
+    plattformen.push(p);
+  }
+  const ziel = folge[anzahl - 1];
+  fundstuecke.push({ art: "Rakete", x: ziel.x + (ziel.breite - 26) / 2, y: ziel.oben - 36, folge, schritt: 0 });
+}
+function erzeugeDachstrecke() {
+  let links = 0;
+  // Die Dachtypen abschnittsweise mischen. Start, Checkpoint und Abstieg behalten ihren Platz.
+  const dachTypen = Array.from({ length: 36 }, (_, index) => index);
+  for (const [von, bis] of [[1, 9], [10, 17], [19, 28], [31, 35]]) {
+    for (let i = bis; i > von; i--) {
+      const j = von + Math.floor(streckenZufall() * (i - von + 1));
+      [dachTypen[i], dachTypen[j]] = [dachTypen[j], dachTypen[i]];
+    }
+  }
+  for (let i = 0; i < 36; i++) {
+    const typ = dachTypen[i];
+    const parkdeck = i >= 31;
+    const breite = parkdeck ? 460 : 370 + Math.floor(streckenZufall() * 106);
+    // Erst zwischen hohen und niedrigen Häusern wechseln, dann zum Hof absteigen.
+    const oben = i >= 29 ? 196 + (i - 29) * 20
+                         : (i % 2 === 0 ? 260 : 208) + Math.floor(streckenZufall() * 12);
+    const dach = { x: links, breite, oben, parkdeck, hindernisse: [] };
+    daecher.push(dach);
+    if ([6, 17, 30].includes(typ)) {
+      const folge = [0, 1].map(n => ({ x: links + 72 + n * 102, breite: 56, oben: oben - 55 * (n + 1) }));
+      plattformen.push(...folge);
+      sperren.push({ folge, schritt: 0, gitterX: links + 281, boden: oben, offen: false });
+    } else if ([3, 12, 23, 33].includes(typ)) {
+      // Unter den hohen Lüftungsschächten bleibt nur ein Kriechgang frei.
+      const hoehe = 140;
+      plattformen.push({ x: links + Math.floor(breite / 2) - 40, breite: 84,
+                         oben: oben - durchfahrtHoehe - hoehe, hoehe });
+    } else if (typ > 0 && typ % 12 !== 4 && typ % 12 !== 8 && typ !== 15) {
+      const art = parkdeck ? (typ % 2 ? "rohr" : "luefter") : ["kamin", "luefter", "rohr"][typ % 3];
+      const hoehe = { kamin: 45, luefter: 34, rohr: 29 }[art];
+      const position = parkdeck ? Math.floor(breite / 2) : i === 18 ? 112 : 82 + Math.floor(streckenZufall() * 23);
+      dach.hindernisse.push({ art, x: links + position, oben: oben - hoehe,
+                             breite: { kamin: 35, luefter: 58, rohr: 48 }[art] });
+    }
+    // Vor der nächsten Dachkante bleibt ein freier Anlauf für den Sprung.
+    if (!parkdeck && dach.hindernisse.length === 1 && typ % 4 === 1) {
+      const fenster = typ % 8 === 1;
+      dach.hindernisse.push({ art: fenster ? "dachfenster" : "abluftrohr", x: links + breite - 145,
+                              oben: oben - (fenster ? 23 : 38), breite: fenster ? 46 : 26 });
+    }
+    if (parkdeck) {
+      dach.hindernisse.push({ art: "poller", x: links + 104, oben: oben - 27, breite: 18 });
+      dach.hindernisse.push({ art: "parkbake", x: links + 342, oben: oben - 32, breite: 43 });
+    }
+    dachFlaechen.push(...dach.hindernisse);
+    if (i === 18) {
+      checkpointX = links + 60;
+      checkpointBoden = oben;
+    }
+    if (typ % 12 === 4) {
+      if (stufe === "leicht") fundstuecke.push({ art: "Rakete", x: links + 150, y: oben - 38 });
+      else platziereRaketenplattformen(links + 105, oben);
+    }
+    if (typ % 12 === 8 || typ === 15) {
+      fundstuecke.push({ art: typ === 15 ? "Rückspuluhr" : "Sprungfeder", x: links + 150, y: oben - 38 });
+    }
+    links += breite;
+    if (i < 30) links += 68 + Math.floor(streckenZufall() * 39);
+    if (parkdeck && i < 35) links += 112 + (i - 31) * 5;
+  }
+  links += 112; // Die letzte Betonplatte endet vor dem Fundament des Parkhauses.
+  const parkhausBreite = 258;
+  daecher.push({ x: links, breite: parkhausBreite, oben: bodenY + figurHoehe, hindernisse: [] });
+  dachFlaechen.push(...daecher);
+  levelBreite = links + parkhausBreite;
+  torX = levelBreite - 125 - torBreite;
+  y = daecher[0].oben - figurHoehe;
+}
+function erzeugeStrecke() {
+  const typen = level === 2 ? ["baustellenbake", "werkzeugkoffer", "bank", "tisch", "muelltonne", "reifenstapel"]
+                            : Object.keys(moebelTypen).filter(typ => !["parkauto", "verkehrskegel", "hydrant", "kiste", "kamin", "luefter", "rohr", "baustellenbake", "baucontainer", "kistenstapel", "muelltonne", "reifenstapel", "bauarbeiter", "bauzaun"].includes(typ));
+  // Ein vorhandener Plattformplatz wird im Hof zur zweistufigen Passage.
+  const plattformVersatz = level === 2 ? 2 * Math.floor(streckenZufall() * 5) : 0;
+  const paarIndex = level === 2 ? 11 + plattformVersatz + 10 * Math.floor(streckenZufall() * 2) : -1;
+  const containerVersatz = level === 2 ? 4 + 2 * Math.floor(streckenZufall() * 6) : 0;
+  const mindestAbstand = level === 2 ? 205 : 290;
+  const streuung = level === 2 ? 185 : 320;
+  let auswahl = [];
+  const bauarbeiter = [];
+  let naechstePosition = x + 180 + Math.floor(streckenZufall() * 120);
+  while (naechstePosition < torX - 250) {
+    // Jeder Typ kommt einmal vor, bevor der Vorrat neu gefüllt wird.
+    if (auswahl.length === 0) auswahl = [...typen];
+    const index = Math.floor(streckenZufall() * auswahl.length);
+    const normalerTyp = auswahl.splice(index, 1)[0];
+    let typ = normalerTyp;
+    if (level === 2 && einrichtung.length % 16 === containerVersatz) typ = "baucontainer";
+    if (einrichtung.length === paarIndex) typ = "kistenstapel";
+    einrichtung.push([naechstePosition, typ]);
+    if (level === 2 && typ === "werkzeugkoffer") {
+      bauarbeiter.push([naechstePosition + moebelTypen.werkzeugkoffer.breite, "bauarbeiter"]);
+      naechstePosition += moebelTypen.bauarbeiter.breite;
+    }
+    naechstePosition += moebelTypen[typ].breite + mindestAbstand + Math.floor(streckenZufall() * streuung);
+  }
+
+  // Eine freie Stelle nahe der Mitte, damit man beim Wiedereinstieg Platz hat.
+  checkpointX = Math.floor(torX / 2);
+  for (const [links, typ] of einrichtung) {
+    if (checkpointX + figurBreite + 40 > links && checkpointX < links + moebelTypen[typ].breite + 70) {
+      checkpointX = links + moebelTypen[typ].breite + 70;
+    }
+  }
+
+  // Pro Streckendrittel gibt es eine Rakete und eine Sprungfeder.
+  for (let drittel = 0; drittel < 3; drittel++) {
+    const raketeZuerst = streckenZufall() < 0.5;
+    for (let paar = 0; paar < 2; paar++) {
+      const abschnitt = drittel * 2 + paar;
+      const von = Math.floor(einrichtung.length * abschnitt / 6);
+      const bis = Math.floor(einrichtung.length * (abschnitt + 1) / 6);
+      const art = (paar === 0) === raketeZuerst ? "Rakete" : "Sprungfeder";
+      let index = von + Math.floor(streckenZufall() * (bis - von));
+      if (art === "Rakete" && stufe !== "leicht") {
+        // Die normalen Plattformen und Gitter stehen in den geraden Lücken.
+        const luecken = [];
+        for (let i = von; i < bis; i++) {
+          const ende = einrichtung[i + 1]?.[0] ?? torX;
+          if (i % 2 === 1 && (checkpointX + figurBreite < einrichtung[i][0] || checkpointX > ende)) luecken.push(i);
+        }
+        index = luecken[Math.floor(streckenZufall() * luecken.length)];
+        const [links, typ] = einrichtung[index];
+        const arbeiterBreite = level === 2 && typ === "werkzeugkoffer" ? moebelTypen.bauarbeiter.breite : 0;
+        const start = links + moebelTypen[typ].breite + arbeiterBreite + 56;
+        platziereRaketenplattformen(start, bodenY + figurHoehe);
+        continue;
+      }
+      const [links, typ] = einrichtung[index];
+      const anfang = links + moebelTypen[typ].breite + 45;
+      const ende = (einrichtung[index + 1]?.[0] ?? torX) - 75;
+      fundstuecke.push({
+        x: anfang + Math.floor(streckenZufall() * (ende - anfang)),
+        art
+      });
+    }
+  }
+
+  // Eine freie Lücke für die einzige Rückspuluhr des Versuchs.
+  const uhrPlaetze = einrichtung.map(([links, typ]) => links + moebelTypen[typ].breite + 80)
+    .filter(platz => platz > 2000 && fundstuecke.every(fund => Math.abs(fund.x - platz) > 52));
+  fundstuecke.push({ x: uhrPlaetze[Math.floor(streckenZufall() * uhrPlaetze.length)], art: "Rückspuluhr" });
+
+  let abschnittNummer = 0;
+  for (let i = 0; i < einrichtung.length - 1; i += 2) {
+    if (level === 2 && i % 10 !== plattformVersatz) continue;
+    if (i + 1 === paarIndex) {
+      const stapelX = einrichtung[paarIndex][0];
+      const boden = bodenY + figurHoehe;
+      plattformen.push({ x: stapelX - 132, breite: 72, oben: boden - 64 });
+      plattformen.push({ x: stapelX, breite: moebelTypen.kistenstapel.breite,
+                         oben: boden - moebelTypen.kistenstapel.hoehe });
+      continue;
+    }
+    const [links, bodenTyp] = einrichtung[i];
+    const breite = 80;
+    const anfang = links + moebelTypen[bodenTyp].breite;
+    const position = Math.floor((anfang + einrichtung[i + 1][0] - breite) / 2);
+    if (fundstuecke.some(fund => fund.x + 26 > position && fund.x < position + breite)) continue;
+    if (checkpointX + figurBreite > position && checkpointX < position + breite) continue;
+    if (level === 2) {
+      const lichteHoehe = plattformen.length % 2 === 0 ? 62 : durchfahrtHoehe;
+      plattformen.push({ x: position, breite, oben: bodenY + figurHoehe - lichteHoehe - 10 });
+      continue;
+    }
+    const sprungHoehe = [80, 56, 64][(i / 2) % 3];
+    const folge = [];
+    const kette = abschnittNummer % 4 === 1 &&
+      !(checkpointX + figurBreite > position - 85 && checkpointX < position + 194) &&
+      !fundstuecke.some(fund => fund.x + 26 > position - 85 && fund.x < position + 194);
+    const hoehen = kette ? [56, 104] : [sprungHoehe];
+    for (const [stufe, hoehe] of hoehen.entries()) {
+      folge.push({
+        x: kette ? position - 84 + stufe * 96 : position,
+        breite: kette ? 52 : breite,
+        oben: bodenY + figurHoehe - hoehe
+      });
+    }
+    plattformen.push(...folge);
+    if (level === 1 && abschnittNummer % 2 === 1) {
+      const letzte = folge[folge.length - 1];
+      sperren.push({ folge, schritt: 0, gitterX: letzte.x + letzte.breite + (kette ? 22 : 45), offen: false });
+    }
+    abschnittNummer++;
+  }
+  einrichtung.push(...bauarbeiter);
+}
+
+function sammlePowerUps(zeitpunkt) {
+  for (const fund of fundstuecke) {
+    if (fund.folge) {
+      const ziel = fund.folge[fund.schritt];
+      if (ziel && !springt && y + figurHoehe === ziel.oben && x + figurBreite > ziel.x && x < ziel.x + ziel.breite) fund.schritt++;
+      if (fund.schritt < fund.folge.length) continue;
+    }
+    const oben = fund.y ?? fundY;
+    if (fund.gesammelt || x + figurBreite <= fund.x || x >= fund.x + 26 ||
+        y + figurHoehe <= oben || kopfY() >= oben + 26) continue;
+    fund.gesammelt = true;
+    if (fund.art === "Rakete") raketeBis = zeitpunkt + (level === 3 && stufe === "schwer" ? 4000 : 3000) + (rundenVorteil === "rakete" ? 1000 : 0);
+    else if (fund.art === "Sprungfeder") federSpruenge += 3;
+    else uhrBereit = true;
+  }
+}
+
+function zeichnePowerUps(kameraX) {
+  for (const fund of fundstuecke) {
+    if (fund.gesammelt || fund.x + 26 < kameraX || fund.x > kameraX + spielfeld.width) continue;
+    stift.save();
+    stift.translate(fund.x, fund.y ?? fundY);
+    const rakete = fund.art === "Rakete";
+    stift.fillStyle = fund.art === "Rückspuluhr" ? "#593288" : rakete ? "#863a25" : "#13575a";
+    stift.beginPath();
+    stift.arc(13, 13, 13, 0, Math.PI * 2);
+    stift.fill();
+    if (fund.art === "Rückspuluhr") {
+      stift.strokeStyle = "#fff4d5";
+      stift.lineWidth = 2;
+      stift.beginPath();
+      stift.arc(13, 13, 9, 0, 2 * Math.PI);
+      stift.moveTo(13, 6);
+      stift.lineTo(13, 13);
+      stift.lineTo(8, 13);
+      stift.stroke();
+    } else if (rakete) {
+      stift.fillStyle = "#ffd56b";
+      stift.fillRect(11, 17, 4, 6);
+      stift.fillStyle = "#fff4dd";
+      stift.beginPath();
+      stift.moveTo(13, 2);
+      stift.lineTo(18, 11);
+      stift.lineTo(18, 18);
+      stift.lineTo(8, 18);
+      stift.lineTo(8, 11);
+      stift.closePath();
+      stift.fill();
+      stift.fillStyle = "#647d90";
+      stift.fillRect(11, 9, 4, 4);
+    } else {
+      stift.strokeStyle = "#a6ffce";
+      stift.lineWidth = 2;
+      stift.beginPath();
+      stift.moveTo(6, 5);
+      for (let i = 0; i < 6; i++) stift.lineTo(i % 2 ? 6 : 20, 6 + i * 3);
+      stift.stroke();
+    }
+    stift.restore();
+  }
+}
+function parkautoKarosserie() {
+  return new Path2D("M2 24L20 20 32 3Q34 0 40 0H65Q70 0 73 5L84 20 105 24Q111 25 112 31V39H0V30Q0 26 2 24Z");
+}
+function zeichneMoebel(links, typ, boden) {
+  const { breite, hoehe } = moebelTypen[typ];
+  const oben = boden - hoehe;
+  if (typ === "parkauto") {
+    stift.save();
+    stift.translate(links, oben);
+    const farben = ["#637e96", "#aa6857", "#819183", "#c2b69d"];
+    stift.fillStyle = farben[Math.floor(links / 113) % farben.length];
+    stift.fill(parkautoKarosserie());
+    stift.strokeStyle = "#354651"; stift.lineWidth = 1.5;
+    stift.stroke(parkautoKarosserie());
+    // Scheiben, Dachsaeule und Tueren in der Seitenansicht.
+    stift.fillStyle = "#b4d2d8";
+    stift.beginPath(); stift.moveTo(25, 20); stift.lineTo(36, 5);
+    stift.lineTo(50, 5); stift.lineTo(50, 20); stift.closePath(); stift.fill();
+    stift.beginPath(); stift.moveTo(54, 5); stift.lineTo(65, 5);
+    stift.lineTo(78, 20); stift.lineTo(54, 20); stift.closePath(); stift.fill();
+    stift.strokeStyle = "#48606b"; stift.lineWidth = 1;
+    stift.beginPath(); stift.moveTo(52, 23); stift.lineTo(52, 36);
+    stift.moveTo(28, 22); stift.lineTo(28, 32); stift.lineTo(77, 32); stift.lineTo(77, 23); stift.stroke();
+    stift.fillStyle = "#d3d8d5";
+    stift.fillRect(42, 24, 6, 2); stift.fillRect(67, 24, 6, 2);
+    stift.fillStyle = "#3a4953"; stift.fillRect(3, 35, 106, 4);
+    stift.fillStyle = "#d3c9a3"; stift.fillRect(103, 26, 7, 5);
+    stift.fillStyle = "#ac443d"; stift.fillRect(1, 26, 6, 5);
+    for (const radX of [22, 88]) {
+      oval(radX, 39, 9, 9, "#27333b");
+      oval(radX, 39, 5, 5, "#9babb0");
+      oval(radX, 39, 2, 2, "#526570");
+    }
+    stift.restore();
+    return;
+  }
+  if (typ === "verkehrskegel") {
+    stift.fillStyle = "#394047";
+    stift.fillRect(links, boden - 5, breite, 5);
+    stift.fillStyle = "#e67b32";
+    stift.beginPath();
+    stift.moveTo(links + 14, oben); stift.lineTo(links + 20, oben);
+    stift.lineTo(links + 29, boden - 5); stift.lineTo(links + 5, boden - 5);
+    stift.closePath(); stift.fill();
+    stift.fillStyle = "#f6efdc";
+    for (const [hoehe, rand, b] of [[10, 11, 12], [23, 7, 20]]) {
+      stift.fillRect(links + rand, oben + hoehe, b, 5);
+    }
+    stift.fillStyle = "#ffb174";
+    stift.fillRect(links + 14, oben + 2, 2, 7);
+    return;
+  }
+  if (typ === "hydrant") {
+    stift.fillStyle = "#6f3533";
+    stift.fillRect(links + 4, boden - 5, 24, 5);
+    stift.fillStyle = "#b95745";
+    stift.fillRect(links + 8, oben + 9, 16, hoehe - 12);
+    stift.fillRect(links, oben + 19, breite, 10);
+    oval(links + 16, oben + 9, 10, 6, "#cf7057");
+    stift.fillStyle = "#e0996e";
+    stift.fillRect(links + 12, oben + 14, 3, 22);
+    stift.fillStyle = "#7a3d36";
+    stift.fillRect(links, oben + 17, 4, 14);
+    stift.fillRect(links + breite - 4, oben + 17, 4, 14);
+    stift.fillStyle = "#c9a57c";
+    stift.fillRect(links + 13, oben, 6, 4);
+    oval(links + 17, oben + 24, 4, 4, "#863b33");
+    return;
+  }
+  if (["kamin", "luefter", "rohr"].includes(typ)) {
+    zeichneDachhindernis({ x: links, oben, breite, art: typ }, boden);
+    return;
+  }
+  if (typ === "bauzaun") {
+    stift.fillStyle = "#48535c";
+    stift.fillRect(links, boden - 6, 20, 6);
+    stift.fillRect(links + breite - 20, boden - 6, 20, 6);
+    stift.strokeStyle = "#5c6a73";
+    stift.lineWidth = 3;
+    stift.strokeRect(links + 4, oben + 2, breite - 8, hoehe - 12);
+    stift.lineWidth = 1.5;
+    for (let gx = 12; gx < breite - 6; gx += 10) {
+      stift.beginPath(); stift.moveTo(links + gx, oben + 4); stift.lineTo(links + gx, boden - 12); stift.stroke();
+    }
+    for (let gy = oben + 17; gy < boden - 12; gy += 14) {
+      stift.beginPath(); stift.moveTo(links + 6, gy); stift.lineTo(links + breite - 6, gy); stift.stroke();
+    }
+    stift.fillStyle = "#fff0cb";
+    stift.fillRect(links + 3, oben + 5, breite - 6, 11);
+    stift.fillStyle = "#cc6144";
+    for (let gx = 5; gx < breite - 8; gx += 18) stift.fillRect(links + gx, oben + 5, 9, 11);
+    return;
+  }
+  if (typ === "bauarbeiter") {
+    const mitte = links + breite / 2;
+    zeichneGehbeine(mitte, boden - 18, 14, 0, "#34495a", "#292b30");
+    zeichneOberkoerper(mitte, oben + 10, 0.8, "#bc845f", "#ed762c", 0);
+    stift.fillStyle = "#ffefa1";
+    stift.fillRect(mitte - 8, oben + 28, 16, 3);
+    stift.fillStyle = "#ffcc38";
+    stift.beginPath();
+    stift.arc(mitte, oben + 8, 8, Math.PI, 2 * Math.PI);
+    stift.fill();
+    stift.fillRect(mitte - 11, oben + 7, 21, 3);
+    if (endlos) {
+      // Ein Presslufthammer und eine aufgebrochene Stelle im Gehweg.
+      const hub = Math.sin(performance.now() / 65 + links) * 1.4;
+      oval(mitte + 7, boden - 1, 17, 3, "#70736c");
+      stift.strokeStyle = "#3c464d"; stift.lineWidth = 3;
+      stift.beginPath(); stift.moveTo(mitte + 9, boden - 22 + hub); stift.lineTo(mitte + 9, boden - 2); stift.stroke();
+      stift.fillStyle = "#e3b63e";
+      stift.fillRect(mitte + 4, boden - 27 + hub, 11, 16);
+      stift.strokeStyle = "#bc845f"; stift.lineWidth = 3;
+      stift.beginPath(); stift.moveTo(mitte - 4, oben + 29); stift.lineTo(mitte + 5, boden - 25 + hub); stift.stroke();
+      stift.fillStyle = "#59616a";
+      stift.fillRect(mitte, boden - 28 + hub, 20, 4);
+    }
+    return;
+  }
+  stift.fillStyle = "#354452";
+  stift.fillRect(links + 3, oben + 5, 5, hoehe - 5);
+  stift.fillRect(links + breite - 8, oben + 5, 5, hoehe - 5);
+  if (typ === "bett") {
+    stift.fillRect(links, oben + 7, breite, 6);
+    stift.fillStyle = "#76a5ad";
+    stift.fillRect(links, oben, breite, 9);
+    stift.fillStyle = "#e8eee7";
+    stift.fillRect(links + 3, oben, 18, 6);
+    stift.fillStyle = "#436a79";
+    stift.fillRect(links + 34, oben, breite - 37, 10);
+  } else if (typ === "automat") {
+    stift.fillStyle = "#903c36";
+    stift.fillRect(links, oben, breite, hoehe);
+    stift.fillStyle = "#b9dae0";
+    stift.fillRect(links + 4, oben + 5, 25, 44);
+    for (let reihe = 0; reihe < 3; reihe++) {
+      for (let fach = 0; fach < 3; fach++) {
+        stift.fillStyle = ["#27818a", "#da9638", "#a84b53"][fach];
+        stift.fillRect(links + 6 + fach * 8, oben + 11 + reihe * 13, 5, 9);
+      }
+    }
+    stift.fillStyle = "#243642";
+    stift.fillRect(links + 33, oben + 17, 7, 11);
+    stift.fillRect(links + 7, oben + 56, 27, 10);
+  } else if (typ === "spind") {
+    stift.fillStyle = "#516c71";
+    stift.fillRect(links, oben, breite, hoehe);
+    stift.fillStyle = "#9bb0a8";
+    stift.fillRect(links + 3, oben + 3, breite - 6, hoehe - 6);
+    stift.fillStyle = "#384a50";
+    for (let schlitz = 0; schlitz < 3; schlitz++) {
+      stift.fillRect(links + 8, oben + 8 + schlitz * 4, 18, 2);
+    }
+    stift.fillRect(links + 24, oben + 33, 3, 9);
+  } else if (typ === "waschmaschine") {
+    stift.fillStyle = "#edf0ea";
+    stift.fillRect(links, oben, breite, hoehe);
+    stift.fillStyle = "#415865";
+    stift.fillRect(links + 4, oben + 4, 14, 4);
+    stift.beginPath();
+    stift.arc(links + 24, oben + 28, 14, 0, Math.PI * 2);
+    stift.fill();
+    stift.fillStyle = "#94c2cb";
+    stift.beginPath();
+    stift.arc(links + 24, oben + 28, 10, 0, Math.PI * 2);
+    stift.fill();
+  } else if (typ === "buecherregal") {
+    stift.fillStyle = "#71503b";
+    stift.fillRect(links, oben, breite, hoehe);
+    for (let fach = 0; fach < 3; fach++) {
+      const regalY = oben + 4 + fach * 21;
+      stift.fillStyle = "#453b38";
+      stift.fillRect(links + 3, regalY, breite - 6, 17);
+      for (let buch = 0; buch < 6; buch++) {
+        const buchHoehe = 11 + (buch + fach) % 3 * 2;
+        stift.fillStyle = ["#be8651", "#6e9892", "#a36660"][(buch + fach) % 3];
+        stift.fillRect(links + 6 + buch * 7, regalY + 17 - buchHoehe, 5, buchHoehe);
+      }
+    }
+  } else if (typ === "werkzeugkoffer") {
+    stift.fillStyle = "#363c41";
+    stift.fillRect(links + 12, oben, 15, 6);
+    stift.fillStyle = "#b54e38";
+    stift.fillRect(links, oben + 4, breite, hoehe - 4);
+    stift.fillStyle = "#edbb73";
+    stift.fillRect(links + 6, oben + 10, 4, 5);
+    stift.fillRect(links + 29, oben + 10, 4, 5);
+  } else if (typ === "waeschewagen") {
+    stift.fillStyle = "#303944";
+    stift.fillRect(links + 6, boden - 7, 8, 7);
+    stift.fillRect(links + breite - 14, boden - 7, 8, 7);
+    stift.fillStyle = "#6c858c";
+    stift.fillRect(links, oben + 7, breite, hoehe - 14);
+    stift.fillStyle = "#ddd9c8";
+    stift.fillRect(links + 2, oben + 2, 29, 8);
+    stift.fillRect(links + 25, oben, 31, 10);
+  } else {
+    stift.fillStyle = typ === "tisch" ? "#93613f" : "#ba8852";
+    stift.fillRect(links, oben, breite, 7);
+    stift.fillStyle = "#573e30";
+    stift.fillRect(links, oben + 6, breite, 2);
+    if (typ === "bank") stift.fillRect(links + 5, boden - 7, breite - 10, 3);
+  }
+}
+// Gemeinsame Silhouette: runder Kopf, gerader Oberkörper, schmale Arme.
+function zeichneOberkoerper(mitte, kopfY, groesse, hautTon, stoff, schritt, kopfRadius = 9) {
+  stift.save();
+  stift.translate(mitte, kopfY);
+  stift.scale(groesse, groesse);
+  stift.fillStyle = hautTon;
+  stift.beginPath();
+  stift.arc(0, 0, kopfRadius, 0, 2 * Math.PI);
+  stift.fill();
+  stift.fillStyle = stoff;
+  stift.fillRect(-10, 9, 20, 28);
+  zeichneGeharme(0, 12, 10, 18, schritt, stoff, hautTon);
+  stift.restore();
+}
+function zeichneZelle(links, nummer) {
+  stift.fillStyle = "#626b70";
+  stift.fillRect(links, 155, 102, 145);
+  stift.fillStyle = "#424c52";
+  stift.fillRect(links + 5, 161, 92, 134);
+  // Die Zellenmöbel liegen hinter Insasse und Gitterstäben.
+  stift.save();
+  stift.translate(links + 6, 279);
+  stift.scale(0.55, 0.55);
+  zeichneMoebel(0, "bett", 0);
+  stift.restore();
+  // Waschbecken mit Wasserhahn.
+  stift.fillStyle = "#a9b9ba";
+  stift.fillRect(links + 79, 222, 3, 8);
+  stift.fillRect(links + 75, 222, 6, 2);
+  stift.fillStyle = "#d3d8d0";
+  stift.fillRect(links + 69, 230, 22, 4);
+  stift.fillRect(links + 73, 234, 14, 4);
+  // Toilette mit Spülkasten und Schüssel.
+  stift.fillRect(links + 82, 255, 9, 14);
+  stift.fillRect(links + 69, 270, 22, 4);
+  stift.fillRect(links + 72, 274, 16, 5);
+  stift.fillRect(links + 78, 279, 8, 6);
+  const personX = links + 46 + Math.sin(performance.now() / 1800 + nummer) * 12;
+  const schritt = Math.sin((personX - links) / 6);
+  const hauttoene = ["#704737", "#edbf9e", "#a66e50", "#d49b73", "#865942", "#bb8769"];
+  zeichneOberkoerper(personX, 232, 1, hauttoene[nummer % hauttoene.length], "#b78060", schritt);
+  const haarfarbe = ["#302725", "#764832", "#51403a", "#9c7955", "#706d68"][nummer % 5];
+  const schnitt = nummer % 4;
+  if (schnitt !== 0) {
+    stift.fillStyle = haarfarbe;
+    stift.beginPath();
+    stift.arc(personX, 231, 9, Math.PI, 2 * Math.PI);
+    stift.fill();
+    if (schnitt === 2) {
+      for (let i = 0; i < 4; i++) oval(personX - 6 + 4 * i, 225, 3.8, 4, haarfarbe);
+    } else if (schnitt === 3) {
+      oval(personX - 8, 235, 3, 8, haarfarbe);
+      oval(personX - 11, 229, 4, 4, haarfarbe);
+    }
+  }
+  stift.save();
+  stift.fillStyle = "#fff1d4";
+  stift.fillRect(personX - 9, 246, 18, 10);
+  stift.fillStyle = "#302b30";
+  stift.font = "bold 8px monospace";
+  stift.textAlign = "center";
+  stift.fillText(String(100 + nummer), personX, 254);
+  stift.restore();
+  zeichneGehbeine(personX, 269, 21, schritt, "#75818a");
+  stift.fillStyle = "#889196";
+  for (let stab = 12; stab < 96; stab += 17) stift.fillRect(links + stab, 160, 3, 136);
+  stift.fillRect(links + 4, 211, 94, 3);
+}
+
+function oval(cx, cy, rx, ry, farbton, pinsel = stift) {
+  pinsel.fillStyle = farbton;
+  pinsel.beginPath();
+  pinsel.ellipse(cx, cy, rx, ry, 0, 0, 2 * Math.PI);
+  pinsel.fill();
+}
+
+function zeichneRaeuber(pinsel = stift, links = x, oben = y, massstab = figurMassstab, figur = charakterWahl.value,
+                        skin = skinWahl.value === "eigen" ? eigenerSkin() : figurenSkins[figur], pose = null) {
+  // Faehigkeit und Kleidung sind unabhaengig: nur der Skin bestimmt das Outfit.
+  const outfit = skin.outfit || "raeuber";
+  pinsel.save();
+  pinsel.translate(links, oben);
+  const tief = pose ? pose.duckt : geduckt && pinsel === stift;
+  const richtung = pose ? pose.richtung : blickrichtung;
+  const kletterPose = pose ? pose.klettert : klettert;
+  const rutscht = pose ? pose.rutscht : false;
+  if (richtung < 0) pinsel.translate(figurBreite, 0);
+  pinsel.scale(massstab * richtung, massstab);
+  // Die Schrittphase folgt der tatsächlich gelaufenen Strecke.
+  const schritt = pose ? pose.schritt : rutscht ? 0 : springt ? 0.5 : Math.sin(laufStrecke / 10);
+  pinsel.lineCap = "round";
+  pinsel.lineJoin = "round";
+  if (rutscht && !pose) {
+    pinsel.save();
+    for (let i = 0; i < 5; i++) {
+      const phase = (performance.now() / 340 + i / 5) % 1;
+      pinsel.globalAlpha = (1 - phase) * 0.4;
+      oval(2 - phase * 17, 34 - phase * (3 + i % 3), 1 + phase * 2, 0.8 + phase, "#b8aca0", pinsel);
+    }
+    pinsel.restore();
+  }
+  for (const [huefte, seite] of [[8, -1], [16, 1]]) {
+    let fussX = huefte + schritt * seite * 4;
+    let fussY = 34 - Math.max(0, schritt * seite) * 3;
+    pinsel.strokeStyle = skin.farbe;
+    pinsel.lineWidth = 5;
+    pinsel.beginPath();
+    if (rutscht) {
+      const hinten = seite === -1;
+      fussX = hinten ? 7 : 26;
+      fussY = 34;
+      pinsel.moveTo(hinten ? 8 : 13, 29);
+      pinsel.lineTo(hinten ? 2 : 20, hinten ? 30 : 32);
+    } else if (tief) {
+      // Hinteres Knie am Boden, vorderer Fuß unter dem aufgestellten Knie.
+      const hinten = seite === -1;
+      fussX = hinten ? 3 : 18 + schritt * 1.5;
+      fussY = hinten ? 33 : 34;
+      pinsel.moveTo(hinten ? 9 : 13, 29);
+      pinsel.lineTo(hinten ? 10 : fussX + 1, hinten ? 33.5 : 26);
+    } else {
+      pinsel.moveTo(huefte, 22);
+      pinsel.lineTo(huefte + 1.5 + schritt * seite * 3, 28);
+    }
+    pinsel.lineTo(fussX, fussY);
+    pinsel.stroke();
+    pinsel.fillStyle = skin.schuhe;
+    oval(fussX + 1, fussY, 3.5, 1.8, skin.schuhe, pinsel);
+    if (outfit === "springer") {
+      pinsel.fillStyle = "#60dec5";
+      pinsel.fillRect(fussX - 2, fussY - 3, 4, 2);
+      pinsel.fillRect(fussX - 2, fussY + 1, 7, 1);
+    }
+  }
+  // Beim Rutschen sitzt die Figur tief und lehnt sich nach hinten.
+  if (tief) {
+    pinsel.translate(rutscht ? 10 : 11, rutscht ? 29 : 30);
+    pinsel.rotate(rutscht ? -0.5 : 0.12);
+    pinsel.translate(-12, -21);
+  }
+  // Gesicht, Haare und Augen aus der Figurenauswahl
+  oval(11.8, 17.3, 6.1, 8, skin.farbe, pinsel);
+  oval(12, 10, 2.7, 3.2, skin.haut, pinsel);
+  pinsel.save();
+  if (tief) {
+    pinsel.translate(12.5, 5.4);
+    pinsel.rotate(rutscht ? 0.5 : -0.12);
+    pinsel.translate(-12.5, -5.4);
+  }
+  oval(12.5, 5.4, 5.9, 6.7, skin.haut, pinsel);
+  oval(18, 6.8, 1.9, 1.4, skin.haut, pinsel);
+  oval(7.2, 6, 1.6, 2.1, skin.haut, pinsel);
+  if (skin.frisur === "iro") {
+    pinsel.fillStyle = skin.haare;
+    pinsel.beginPath();
+    pinsel.moveTo(7.5, 3.2);
+    pinsel.lineTo(8.5, -3);
+    pinsel.lineTo(10.5, -1.8);
+    pinsel.lineTo(12, -4.5);
+    pinsel.lineTo(14, -2);
+    pinsel.lineTo(16, -3);
+    pinsel.lineTo(17.3, 2);
+    pinsel.quadraticCurveTo(12, -0.2, 7.5, 3.2);
+    pinsel.fill();
+  } else if (skin.frisur === "locken") {
+    for (let i = 0; i < 8; i++) {
+      const winkel = Math.PI + i * Math.PI / 7;
+      oval(12 + 5.4 * Math.cos(winkel), 4 + 5 * Math.sin(winkel), 2.2, 2.3, skin.haare, pinsel);
+    }
+    oval(12, 2.2, 5, 2.5, skin.haare, pinsel);
+  } else if (skin.frisur !== "kahl") {
+    pinsel.fillStyle = skin.haare;
+    pinsel.beginPath();
+    pinsel.arc(12, 5, 6.6, Math.PI, 2 * Math.PI);
+    pinsel.fill();
+    if (skin.frisur === "lang") pinsel.fillRect(5.5, 4, 3, 9);
+    if (skin.frisur === "zopf") {
+      oval(4.8, 7.2, 2.1, 4.7, skin.haare, pinsel);
+      pinsel.fillStyle = "#e7ae57";
+      pinsel.fillRect(4.8, 3.8, 2.5, 1.2);
+    }
+  }
+  oval(15.2, 5, 2, 1.3, "#fffcf0", pinsel);
+  oval(16, 5, 0.95, 1.15, skin.augen, pinsel);
+  if (skin.bart === "voll") {
+    pinsel.fillStyle = skin.haare;
+    pinsel.beginPath();
+    pinsel.moveTo(7.2, 6.7);
+    pinsel.quadraticCurveTo(12, 10.6, 18, 8.2);
+    pinsel.quadraticCurveTo(17, 14.2, 11.3, 12.6);
+    pinsel.quadraticCurveTo(8, 11.8, 7.2, 6.7);
+    pinsel.fill();
+  }
+  if (skin.bart === "schnauzer" || skin.bart === "voll") {
+    oval(15.8, 8.2, 2.5, 0.9, skin.haare, pinsel);
+  }
+  if (skin.ausdruck === "grinsen") {
+    pinsel.fillStyle = "#fff4df";
+    pinsel.beginPath();
+    pinsel.moveTo(12.8, 8.7);
+    pinsel.quadraticCurveTo(15, 9.8, 17.5, 8.7);
+    pinsel.quadraticCurveTo(15.5, 12.5, 12.8, 8.7);
+    pinsel.fill();
+  } else if (skin.ausdruck === "ernst") {
+    pinsel.strokeStyle = "#47352f";
+    pinsel.lineWidth = 1;
+    pinsel.beginPath();
+    pinsel.moveTo(13, 2.6);
+    pinsel.lineTo(17.4, 4.4);
+    pinsel.moveTo(14, 10);
+    pinsel.lineTo(17, 9.7);
+    pinsel.stroke();
+  } else if (skin.ausdruck === "erstaunt") {
+    oval(15.2, 5, 2.1, 1.9, "#fffcf0", pinsel);
+    oval(16, 5, 0.8, 1, skin.augen, pinsel);
+    oval(15.5, 10, 1.1, 1.4, "#563732", pinsel);
+  }
+  pinsel.restore();
+  // Weißes Nummernschild auf dem Overall
+  pinsel.fillStyle = "#fff1d4";
+  pinsel.fillRect(8, 14, 8, 6);
+  pinsel.fillStyle = "#302b30";
+  pinsel.font = "bold 5px monospace";
+  pinsel.fillText(skin.nummer, 8.5, 19, 7);
+  if (skin.halskette && skin.halskette !== "ohne") {
+    pinsel.save();
+    const gold = skin.halskette === "gold" || skin.halskette === "panzer";
+    pinsel.strokeStyle = gold ? "#ffdb64" : "#e1edf4";
+    pinsel.lineWidth = 0.8;
+    pinsel.beginPath();
+    pinsel.moveTo(8, 12);
+    pinsel.quadraticCurveTo(12, 17, 16, 12);
+    pinsel.stroke();
+    if (skin.halskette === "panzer") {
+      for (let i = 0; i <= 6; i++) {
+        const t = i / 6;
+        pinsel.beginPath();
+        pinsel.ellipse(8 + 8 * t, 12 + 10 * t * (1 - t), 0.95, 0.6, -0.5, 0, 2 * Math.PI);
+        pinsel.stroke();
+      }
+    } else if (skin.halskette === "anhaenger") {
+      pinsel.fillStyle = "#4083ae";
+      pinsel.beginPath();
+      pinsel.moveTo(12, 14.4);
+      pinsel.lineTo(10.5, 16.6);
+      pinsel.lineTo(11.8, 16.6);
+      pinsel.lineTo(11.3, 18);
+      pinsel.lineTo(13.7, 15.6);
+      pinsel.lineTo(12.4, 15.6);
+      pinsel.closePath();
+      pinsel.fill();
+    }
+    pinsel.restore();
+  }
+  if (outfit !== "raeuber") {
+    pinsel.fillStyle = outfit === "zeit" ? "#ffe283" : "#aff3df";
+    pinsel.font = "bold 5px sans-serif";
+    const abzeichen = { zeit: "↶", springer: "↑", ausdauer: "♥" };
+    pinsel.fillText(abzeichen[outfit], 9, 24);
+  }
+  for (const seite of [1, -1]) {
+    const schulter = 12 + seite * 4.7;
+    const hand = rutscht ? (seite === -1 ? 4 : 20) : tief ? schulter + 3 : schulter + 2 - seite * schritt * 4;
+    const handY = rutscht ? (seite === -1 ? 25 : 18) : kletterPose ? 8 + seite * schritt * 5 : tief ? 20 : 19 - Math.abs(schritt) * 2;
+    pinsel.strokeStyle = skin.farbe;
+    pinsel.lineWidth = 3.5;
+    pinsel.beginPath();
+    pinsel.moveTo(schulter, 14);
+    pinsel.lineTo(hand - 3, kletterPose ? 12 : 19);
+    pinsel.lineTo(hand, handY);
+    pinsel.stroke();
+    oval(hand, handY, 1.7, 1.8, skin.haut, pinsel);
+    if (outfit === "zeit" && seite === 1) {
+      oval(hand, handY - 1, 2.6, 2.6, "#374455", pinsel);
+      oval(hand, handY - 1, 1.9, 1.9, "#ffe283", pinsel);
+      pinsel.fillStyle = "#374455";
+      pinsel.fillRect(hand, handY - 2.5, 0.6, 1.6);
+    }
+    if (outfit === "ausdauer") oval(schulter, 14, 3.6, 2.5, "#566a79", pinsel);
+  }
+  pinsel.restore();
+}
+
+let polizeiX = 4;
+let polizeiRichtung = 1;
+let polizeiSchritt = 0;
+const zellenausgang = 160;
+let zelleOffen = false;
+let entriegeltAm = Infinity;
+const riegelPauseMs = 220;
+const gitterFahrtMs = 1450;
+function gitterFortschritt(zeitpunkt) {
+  if (level !== 1) return 1;
+  const t = Math.max(0, Math.min(1, (zeitpunkt - entriegeltAm - riegelPauseMs) / gitterFahrtMs));
+  return t * t * (3 - 2 * t);
+}
+let schlossTreffer = 0;
+const zielBreiten = [0.25, 0.20, 0.15];
+let zielBreite = zielBreiten[0];
+let zielLinks = Math.random() * (1 - zielBreite);
+let letzterFehlversuch = -Infinity;
+let zeigerStart = 0;
+let startPhase = 0;
+function zeigerPhase(zeitpunkt) {
+  const tempo = 1 + schlossTreffer * 0.12;
+  return (startPhase + (zeitpunkt - zeigerStart) * tempo / 1000) % 2;
+}
+function schlossZeiger(zeitpunkt) {
+  return 1 - Math.abs(zeigerPhase(zeitpunkt) - 1);
+}
+function anDerTuer() {
+  return x + figurBreite >= zellenausgang - 32;
+}
+function knackeSchloss(zeitpunkt) {
+  if (zelleOffen || !anDerTuer()) return;
+  const zeiger = schlossZeiger(zeitpunkt);
+  const treffer = zeiger >= zielLinks && zeiger <= zielLinks + zielBreite;
+  spieleSchlossTon(treffer);
+  if (!treffer) {
+    letzterFehlversuch = zeitpunkt;
+    return;
+  }
+  startPhase = zeigerPhase(zeitpunkt);
+  zeigerStart = zeitpunkt;
+  schlossTreffer++;
+  letzterFehlversuch = -Infinity;
+  zelleOffen = schlossTreffer === zielBreiten.length;
+  if (zelleOffen) {
+    entriegeltAm = zeitpunkt;
+    spieleZellentuer();
+  }
+  if (!zelleOffen) {
+    zielBreite = zielBreiten[schlossTreffer];
+    // Das nächste Ziel liegt an einer anderen Stelle und enthält den Zeiger noch nicht.
+    const abstand = 0.03;
+    const linksVerfuegbar = Math.max(0, zeiger - zielBreite - abstand);
+    const rechtsVerfuegbar = Math.max(0, 1 - zielBreite - zeiger - abstand);
+    const los = Math.random() * (linksVerfuegbar + rechtsVerfuegbar);
+    zielLinks = los < linksVerfuegbar ? los : zeiger + abstand + los - linksVerfuegbar;
+  }
+}
+let polizeiStart = Infinity;
+const benommenDauer = 500;
+let benommenBis = -Infinity;
+let kopfsprungBereit = false;
+let sprintPhase = "laufen";
+let phasenEnde = 0;
+let ton;
+let musikKanal;
+const musikRegler = document.getElementById("musik");
+const effektRegler = document.getElementById("effekte");
+let effektKanal;
+let menueKanal;
+let menueTaktgeber;
+const songAuswahl = document.getElementById("menueSong");
+const nachtansicht = document.getElementById("nachtansicht");
+try { nachtansicht.checked = localStorage.getItem("nachtansicht") === "an"; } catch {}
+function zeigeTageszeit() {
+  document.querySelector("main").style.backgroundImage = `url("${panoramaAdresse(nachtansicht.checked ? "nacht" : "menue")}")`;
+  document.querySelector("main").classList.toggle("nacht", nachtansicht.checked);
+}
+zeigeTageszeit();
+nachtansicht.addEventListener("change", () => {
+  zeigeTageszeit();
+  try { localStorage.setItem("nachtansicht", nachtansicht.checked ? "an" : "aus"); } catch {}
+});
+try {
+  const gespeichert = localStorage.getItem("menueSong");
+  if (Array.from(songAuswahl.options).some(option => option.value === gespeichert)) songAuswahl.value = gespeichert;
+} catch {}
+function stoppeMenueSong() {
+  clearInterval(menueTaktgeber);
+  menueKanal?.disconnect();
+  menueKanal = null;
+}
+songAuswahl.addEventListener("change", () => {
+  try { localStorage.setItem("menueSong", songAuswahl.value); } catch {}
+  stoppeMenueSong();
+  aktiviereTon();
+});
+function verbindeRegler(regler, speicher, kanal, skala) {
+  try { regler.value = localStorage.getItem(speicher) ?? regler.value; } catch {}
+  const wert = document.getElementById(regler.id + "Wert");
+  function aktualisieren() {
+    wert.value = regler.value + " %";
+    if (kanal()) kanal().gain.setTargetAtTime(regler.valueAsNumber / skala, ton.currentTime, 0.01);
+  }
+  aktualisieren();
+  regler.addEventListener("input", aktualisieren);
+  regler.addEventListener("change", () => {
+    try { localStorage.setItem(speicher, regler.value); } catch {}
+  });
+  regler.addEventListener("pointerup", () => regler.blur());
+}
+verbindeRegler(musikRegler, "musikLautstaerke", () => musikKanal, 50);
+verbindeRegler(effektRegler, "effektLautstaerke", () => effektKanal, 100);
+
+function aktiviereTon() {
+  if (!window.AudioContext) return;
+  if (!ton) {
+    ton = new AudioContext();
+    musikKanal = ton.createGain();
+    effektKanal = ton.createGain();
+    musikKanal.gain.value = musikRegler.valueAsNumber / 50;
+    effektKanal.gain.value = effektRegler.valueAsNumber / 100;
+    musikKanal.connect(ton.destination);
+    effektKanal.connect(ton.destination);
+  }
+  if (ton.state !== "running") ton.resume().catch(() => {});
+  if (!menueKanal && document.querySelector("main").classList.contains("im-menue")) {
+    menueKanal = ton.createGain();
+    menueKanal.connect(musikKanal);
+    // Je acht Achtel bilden einen Takt. Eine Null lässt der Melodie eine Pause.
+    const akkorde = [[130.81, 196, 246.94], [110, 196, 261.63], [87.31, 174.61, 220],
+                     [98, 196, 246.94], [146.83, 220, 261.63], [164.81, 196, 246.94]];
+    const harmonien = [0, 1, 2, 3, 0, 5, 4, 3, 1, 5, 2, 0, 4, 2, 3, 0];
+    const phrasen = [
+      [329.63, 0, 392, 0, 440, 392, 0, 329.63],
+      [0, 293.66, 329.63, 0, 261.63, 0, 0, 293.66],
+      [392, 0, 0, 440, 523.25, 0, 493.88, 0],
+      [440, 392, 0, 329.63, 0, 293.66, 0, 0],
+      [0, 329.63, 0, 392, 0, 493.88, 440, 0],
+      [523.25, 0, 440, 392, 0, 0, 329.63, 0],
+      [293.66, 0, 349.23, 0, 440, 0, 392, 349.23],
+      [329.63, 0, 293.66, 0, 261.63, 0, 0, 0]
+    ];
+    const melodie = [0, 1, 2, 3, 4, 0, 6, 1, 5, 4, 3, 2, 6, 5, 3, 7];
+    // Nachtfahrt hat einen eigenen Basslauf und eine kurze, gezupfte Synth-Melodie.
+    const nachtBass = [146.83, 116.54, 174.61, 130.81];
+    const nachtMelodie = [
+      [440, 0, 349.23, 392, 0, 440, 523.25, 0],
+      [466.16, 0, 0, 349.23, 293.66, 0, 349.23, 392],
+      [440, 523.25, 0, 0, 659.25, 0, 523.25, 440],
+      [392, 0, 329.63, 392, 0, 293.66, 0, 0]
+    ];
+    const nacht = songAuswahl.value === "nachtfahrt";
+    const mondschein = songAuswahl.value === "mondschein";
+    // Die Melodien sind in Halbtonschritten über dem Grundton notiert.
+    // null steht für eine Pause.
+    const weitereSongs = {
+      citygroove: {
+        tempo: 0.255, form: "triangle", dauer: 0.26, swing: 0.018,
+        grundtoene: [110, 146.83, 98, 130.81], bassSchlaege: [0, 3, 4, 7],
+        beat: [0, 4], akkord: [0, 4, 7],
+        motive: [[16, 19, null, 21, 19, null, 16, 14], [12, null, 16, 19, 24, 21, null, 19],
+          [19, 21, 24, null, 28, 24, 21, 19], [16, null, 14, 12, null, 14, 16, null]]
+      },
+      skyline: {
+        tempo: 0.24, form: "sine", dauer: 0.38, swing: 0,
+        grundtoene: [130.81, 98, 110, 87.31], bassSchlaege: [1, 3, 5, 7],
+        beat: [0, 2, 4, 6], akkord: [0, 4, 7],
+        motive: [[19, null, 24, null, 28, 26, 24, null], [19, 16, null, 19, 21, null, 24, null],
+          [24, 28, 31, null, 28, null, 26, 24], [21, null, 19, 16, 14, null, 12, null]]
+      },
+      fluchtplan: {
+        tempo: 0.30, form: "triangle", dauer: 0.35, swing: 0,
+        grundtoene: [146.83, 116.54, 130.81, 98], bassSchlaege: [0, 2, 4, 6],
+        beat: [0, 4], akkord: [0, 3, 7],
+        motive: [[12, 19, 15, 19, 24, null, 22, 19], [15, null, 19, 22, 24, 22, 19, null],
+          [24, 27, null, 26, 24, null, 22, 19], [22, 19, 15, null, 14, 12, null, null]]
+      },
+      hinterhof: {
+        tempo: 0.29, form: "triangle", dauer: 0.22, swing: 0.04,
+        grundtoene: [98, 130.81, 98, 110], bassSchlaege: [0, 3, 6],
+        motive: [[12, null, 15, 17, null, 19, null, 15], [null, 19, 17, null, 15, null, 12, 10]]
+      },
+      pixel: {
+        tempo: 0.20, form: "square", dauer: 0.12, swing: 0,
+        grundtoene: [130.81, 110, 87.31, 98], bassSchlaege: [0, 2, 4, 6],
+        motive: [[12, 16, 19, 24, null, 19, 16, 19], [24, null, 19, 17, 16, 14, 12, null]]
+      },
+      hafen: {
+        tempo: 0.53, form: "sine", dauer: 1.8, swing: 0,
+        grundtoene: [146.83, 130.81, 98, 110], bassSchlaege: [0],
+        motive: [[19, null, null, 14, null, 12, null, null], [null, 12, null, null, 19, null, 24, null]]
+      }
+    };
+    const weitererSong = weitereSongs[songAuswahl.value];
+    // MIDI-Notennummern: 0 ist eine Pause. Der Refrain hat eine eigene Gesangsmelodie.
+    const popSongs = {
+      heimweg: {
+        bpm: 104, gitarre: true, bass: [50, 45, 47, 43],
+        akkorde: [[62, 66, 69], [61, 64, 69], [62, 66, 71], [62, 67, 71]],
+        strophe: [[66, 0, 64, 62, 0, 0, 64, 0], [0, 64, 66, 0, 69, 0, 66, 64]],
+        refrain: [[74, 0, 73, 71, 69, 0, 0, 71], [69, 0, 66, 0, 64, 66, 69, 0]]
+      },
+      morgenrot: {
+        bpm: 82, gitarre: false, bass: [48, 45, 41, 43],
+        akkorde: [[59, 62, 64, 67], [57, 60, 64, 67], [57, 60, 64, 65], [55, 59, 62, 69]],
+        strophe: [[0, 64, 0, 67, 0, 64, 62, 0], [60, 0, 0, 62, 64, 0, 0, 0]],
+        refrain: [[67, 0, 0, 69, 72, 0, 71, 0], [69, 67, 0, 0, 64, 0, 62, 64]]
+      }
+    };
+    const popSong = popSongs[songAuswahl.value];
+    function spielePopTakt(schritt, wann) {
+      const takt = Math.floor(schritt / 8) % 16;
+      const achtel = schritt % 8;
+      const laenge = 30 / popSong.bpm;
+      const akkord = popSong.akkorde[takt % 4];
+      const refrain = takt >= 8;
+      const melodie = (refrain ? popSong.refrain : popSong.strophe)[takt % 2];
+      const hz = midi => 440 * 2 ** ((midi - 69) / 12);
+      if (achtel === 0 || achtel === 5) {
+        const bass = hz(popSong.bass[takt % 4]);
+        klangNote(wann, laenge * 2.8, bass, bass, "sine", 0.042, menueKanal);
+      }
+      if (achtel === 0 || achtel === (popSong.gitarre ? 3 : 5) || (refrain && achtel === 6)) {
+        akkord.forEach((midi, i) => {
+          const note = hz(midi);
+          const anschlag = wann + i * (popSong.gitarre ? 0.025 : 0.009);
+          klangNote(anschlag, laenge * 3, note, note, "triangle", 0.021, menueKanal);
+          klangNote(anschlag, 0.20, note * 2, note * 2, "sine", 0.012, menueKanal);
+        });
+      }
+      if (melodie[achtel]) {
+        let dauer = 1;
+        while (achtel + dauer < 8 && !melodie[achtel + dauer]) dauer++;
+        const note = hz(melodie[achtel]);
+        klangNote(wann, laenge * dauer, note * .995, note, "triangle", 0.046, menueKanal);
+        if (refrain) klangNote(wann + .014, laenge * dauer, note * 1.002, note, "sine", 0.024, menueKanal);
+      }
+      return laenge;
+    }
+    // Sechs Achtel pro Takt geben dem Walzer seinen schaukelnden Rhythmus.
+    const walzer = [
+      [196, 293.66, 369.99, 440], [164.81, 246.94, 329.63, 392],
+      [130.81, 261.63, 329.63, 392], [146.83, 220, 293.66, 369.99]
+    ];
+    let schritt = 0;
+    let wann = ton.currentTime;
+    function spieleMenueTakt() {
+      if (ton.state !== "running" || !menueKanal) return;
+      wann = Math.max(wann, ton.currentTime);
+      while (wann < ton.currentTime + 0.14) {
+        if (popSong) {
+          wann += spielePopTakt(schritt, wann);
+          schritt++;
+          continue;
+        }
+        if (mondschein) {
+          const takt = Math.floor(schritt / 6);
+          const achtel = schritt % 6;
+          const akkord = walzer[takt % walzer.length];
+          const motiv = takt % 8 < 4 ? [3, 0, 2, 1, 2, 0] : [2, 3, 0, 2, 1, 0];
+          if (achtel === 0) klangNote(wann, 1.35, akkord[0] / 2, akkord[0] / 2, "sine", 0.045, menueKanal);
+          if (achtel === 2 || achtel === 4) klangNote(wann, 0.55, akkord[1], akkord[1], "triangle", 0.019, menueKanal);
+          if (motiv[achtel]) {
+            const note = akkord[motiv[achtel]];
+            klangNote(wann, 1.1, note, note, "sine", 0.048, menueKanal);
+            klangNote(wann, 0.32, note * 2, note * 2, "sine", 0.012, menueKanal);
+          }
+          schritt++;
+          wann += 0.36;
+          continue;
+        }
+        const takt = Math.floor(schritt / 8) % harmonien.length;
+        const achtel = schritt % 8;
+        if (weitererSong) {
+          const song = weitererSong;
+          const grundton = song.grundtoene[takt % song.grundtoene.length];
+          const motiv = song.motive[(takt + Math.floor(takt / 4)) % song.motive.length];
+          if (song.beat) {
+            if (song.beat.includes(achtel)) klangNote(wann, 0.13, 105, 42, "sine", 0.028, menueKanal);
+            if (achtel === 2 || achtel === 6) klangNote(wann, 0.07, 850, 280, "triangle", 0.012, menueKanal);
+            if (achtel % 2) klangNote(wann, 0.035, 3600, 1700, "square", 0.004, menueKanal);
+            if (achtel === 0) for (const intervall of song.akkord) {
+              const akkordton = grundton * 2 ** (intervall / 12);
+              klangNote(wann, song.tempo * 6, akkordton, akkordton, "sine", 0.010, menueKanal);
+            }
+          }
+          if (motiv[achtel] !== null) {
+            const note = grundton * 2 ** (motiv[achtel] / 12);
+            const anschlag = wann + (achtel % 2) * song.swing;
+            klangNote(anschlag, song.dauer, note, note, song.form, song.form === "square" ? 0.018 : 0.048, menueKanal);
+          }
+          if (song.bassSchlaege.includes(achtel)) {
+            klangNote(wann, song.tempo * 2, grundton, grundton, "sine", 0.045, menueKanal);
+          }
+          schritt++;
+          wann += song.tempo;
+          continue;
+        }
+        if (nacht) {
+          const strophe = takt % nachtBass.length;
+          const tonhoehe = nachtMelodie[strophe][achtel];
+          if (tonhoehe) klangNote(wann, 0.38, tonhoehe, tonhoehe, "triangle", 0.043, menueKanal);
+          if (achtel % 2 === 0) {
+            const bass = nachtBass[strophe] * (achtel === 6 ? 0.75 : 0.5);
+            klangNote(wann, 0.24, bass, bass, "triangle", 0.040, menueKanal);
+            klangNote(wann, 0.12, 106, 48, "sine", 0.032, menueKanal);
+          } else {
+            klangNote(wann, 0.05, 2400, 900, "triangle", 0.012, menueKanal);
+          }
+          schritt++;
+          wann += 0.30;
+          continue;
+        }
+        const akkord = akkorde[harmonien[takt]];
+        const note = phrasen[melodie[takt]][achtel];
+        if (note) klangNote(wann, 0.95, note, note, "sine", 0.048, menueKanal);
+        if (achtel === 0 || achtel === 4) {
+          klangNote(wann, 0.15, 94, 42, "sine", 0.030, menueKanal);
+          const bass = akkord[achtel === 0 ? 0 : 1] / 2;
+          klangNote(wann, 1.2, bass, bass, "triangle", 0.026, menueKanal);
+        }
+        if (achtel === 2 || achtel === 6) {
+          klangNote(wann, 0.065, 720, 320, "triangle", 0.013, menueKanal);
+          klangNote(wann, 0.8, akkord[2], akkord[2], "sine", 0.018, menueKanal);
+        }
+        if (achtel % 2 === 1) klangNote(wann + 0.025, 0.035, 3900, 2300, "square", 0.005, menueKanal);
+        schritt++;
+        wann += 0.4;
+      }
+    }
+    spieleMenueTakt();
+    menueTaktgeber = setInterval(spieleMenueTakt, 80);
+  }
+}
+document.addEventListener("click", aktiviereTon, true);
+document.addEventListener("keydown", aktiviereTon, true);
+
+// Sekunden im normalen Lauftempo bis zur nächsten Sprintwarnung.
+const sprintPausen = { leicht: 29, mittel: 20, schwer: 10 };
+const sternZeiten = {
+  leicht: { drei: 90000, zwei: 120000 },
+  mittel: { drei: 105000, zwei: 120000 },
+  schwer: { drei: 120000, zwei: 135000 }
+};
+const tempoBonus = { leicht: 0, mittel: 0.18, schwer: 0.3 };
+let stufe = "mittel";
+function planeSprint(zeitpunkt) {
+  sprintPhase = "laufen";
+  phasenEnde = zeitpunkt + 1000 * (endlos ? Math.max(4, 18 - (endlosStufe() - 1) * 2) : sprintPausen[stufe]);
+}
+
+function verlasseStartzelle(zeitpunkt) {
+  if (!zelleOffen || polizeiStart !== Infinity || x < zellenausgang) return;
+  spieleDurchgang();
+  polizeiX = zellenausgang - 36;
+  polizeiStart = zeitpunkt + 2000;
+  planeSprint(polizeiStart);
+  naechsterFlug = zeitpunkt + 6000;
+}
+
+function klangNote(jetzt, dauer, von, bis, form, staerke, ausgang = effektKanal) {
+  const ende = jetzt + dauer;
+  const signal = ton.createOscillator();
+  const pegel = ton.createGain();
+  signal.type = form;
+  signal.frequency.setValueAtTime(von, jetzt);
+  signal.frequency.exponentialRampToValueAtTime(bis, ende);
+  pegel.gain.setValueAtTime(0, jetzt);
+  pegel.gain.linearRampToValueAtTime(staerke, jetzt + 0.006);
+  pegel.gain.exponentialRampToValueAtTime(0.001, ende);
+  signal.connect(pegel).connect(ausgang);
+  signal.start(jetzt);
+  signal.stop(ende);
+}
+
+// Leiser Basspuls mit einer kurzen, wiederkehrenden Melodie.
+const bassfolge = [110, 110, 87.31, 98];
+const jagdMelodie = [330, 0, 392, 330, 0, 294, 0, 262, 330, 0, 349, 0, 294, 262, 247, 0];
+let musikSchritt = 0;
+let naechsteNote = 0;
+function spieleJagdmusik(zeitpunkt) {
+  if (!ton || ton.state !== "running" || gitterFortschritt(zeitpunkt) < 1) return;
+  const jetzt = ton.currentTime;
+  if (naechsteNote < jetzt) naechsteNote = jetzt;
+  while (naechsteNote < jetzt + 0.06) {
+    const takt = musikSchritt % 16;
+    const bass = bassfolge[Math.floor(takt / 4)];
+    if (takt % 2 === 0) klangNote(naechsteNote, 0.16, bass, bass, "triangle", 0.038, musikKanal);
+    if (jagdMelodie[takt]) klangNote(naechsteNote, 0.12, jagdMelodie[takt], jagdMelodie[takt], "sine", 0.022, musikKanal);
+    naechsteNote += 0.205;
+    musikSchritt++;
+  }
+}
+
+function spieleDurchgang() {
+  if (!ton || ton.state !== "running") return;
+  const t = ton.currentTime;
+  klangNote(t, 0.14, 310, 170, "triangle", 0.14);
+  klangNote(t + 0.12, 0.12, 115, 53, "sine", 0.2);
+  klangNote(t + 0.13, 0.065, 860, 380, "triangle", 0.09);
+}
+
+function spieleErwischt() {
+  if (!ton || ton.state !== "running") return;
+  const t = ton.currentTime;
+  klangNote(t, 0.15, 370, 295, "triangle", 0.14);
+  klangNote(t + 0.15, 0.30, 247, 123, "triangle", 0.14);
+  naechsteNote = t + 0.50;
+}
+
+function spieleSchlossTon(treffer) {
+  if (!ton || ton.state !== "running") return;
+  const jetzt = ton.currentTime;
+  if (treffer) {
+    klangNote(jetzt, 0.13, 587, 587, "triangle", 0.13);
+    klangNote(jetzt + 0.09, 0.22, 880, 880, "sine", 0.14);
+  } else {
+    klangNote(jetzt, 0.16, 230, 125, "sine", 0.15);
+  }
+}
+
+function spieleZellentuer() {
+  if (!ton || ton.state !== "running") return;
+  const riegel = ton.currentTime;
+  const beginn = riegel + riegelPauseMs / 1000;
+  const dauer = gitterFahrtMs / 1000;
+  // Kurze Anschläge mit mehreren unharmonischen Resonanzen klingen metallisch.
+  function anschlag(wann, grundton, laut) {
+    for (const [faktor, abklingen] of [[1, 0.18], [2.71, 0.11], [4.13, 0.065]]) {
+      klangNote(wann, abklingen, grundton * faktor, grundton * faktor * 0.99, "sine", laut / faktor);
+    }
+  }
+  anschlag(riegel, 680, 0.17);
+  anschlag(riegel + 0.075, 390, 0.12);
+  const puffer = ton.createBuffer(1, Math.ceil(ton.sampleRate * dauer), ton.sampleRate);
+  const daten = puffer.getChannelData(0);
+  for (let i = 0; i < daten.length; i++) {
+    const t = i / ton.sampleRate;
+    daten[i] = (Math.random() * 2 - 1) * Math.sin(Math.PI * t / dauer)
+      * (0.18 + 0.13 * Math.cos(87 * t + 0.7 * Math.sin(t * 13)));
+  }
+  const rollen = ton.createBufferSource();
+  rollen.buffer = puffer;
+  const metall = ton.createBiquadFilter();
+  metall.type = "bandpass";
+  metall.frequency.setValueAtTime(1450, beginn);
+  metall.frequency.linearRampToValueAtTime(670, beginn + dauer);
+  rollen.connect(metall).connect(effektKanal);
+  rollen.start(beginn);
+  for (const anteil of [0.17, 0.34, 0.47, 0.61, 0.8]) anschlag(beginn + dauer * anteil, 315, 0.034);
+  anschlag(beginn + dauer, 198, 0.23);
+  anschlag(beginn + dauer + 0.055, 485, 0.075);
+}
+
+function spieleSirene() {
+  if (!ton || ton.state !== "running") return;
+  const signal = ton.createOscillator();
+  const lautstaerke = ton.createGain();
+  const jetzt = ton.currentTime;
+  signal.frequency.setValueAtTime(600, jetzt);
+  signal.frequency.linearRampToValueAtTime(960, jetzt + 0.22);
+  signal.frequency.linearRampToValueAtTime(600, jetzt + 0.48);
+  lautstaerke.gain.setValueAtTime(0, jetzt);
+  lautstaerke.gain.linearRampToValueAtTime(0.12, jetzt + 0.02);
+  lautstaerke.gain.linearRampToValueAtTime(0, jetzt + 0.5);
+  signal.connect(lautstaerke).connect(effektKanal);
+  signal.start(jetzt);
+  signal.stop(jetzt + 0.5);
+}
+
+function bewegePolizist(zeitpunkt) {
+  if (zeitpunkt < polizeiStart || zeitpunkt < benommenBis) return;
+  if (zeitpunkt >= phasenEnde) {
+    if (sprintPhase === "laufen") {
+      sprintPhase = "warnung";
+      phasenEnde = zeitpunkt + 1000;
+      spieleSirene();
+    } else if (sprintPhase === "warnung") {
+      sprintPhase = "sprint";
+      phasenEnde = zeitpunkt + 2000;
+    } else {
+      planeSprint(zeitpunkt);
+    }
+  }
+  const abstand = x - polizeiX;
+  const grundtempo = level === 1 ? 3.92 : 4;
+  const lauftempo = endlos ? Math.min(5.1, 4.08 + (endlosStufe() - 1) * 0.09) : grundtempo + tempoBonus[stufe];
+  const tempo = sprintPhase === "sprint" ? (endlos ? Math.min(6.6, 5.25 + endlosStufe() * 0.09) : 5.4) : lauftempo;
+  const bewegung = Math.sign(abstand) * Math.min(Math.abs(abstand), tempo);
+  polizeiX += bewegung;
+  if (bewegung !== 0) polizeiRichtung = Math.sign(bewegung);
+  polizeiSchritt = bewegung === 0 ? 0 : polizeiSchritt + Math.abs(bewegung);
+}
+
+function polizeiSprunghoehe() {
+  if (level === 3) {
+    const mitte = polizeiX + 16;
+    let vorher = daecher[0];
+    if (mitte < 0) return bodenY + figurHoehe - vorher.oben;
+    for (const dach of daecher) {
+      if (mitte < dach.x) {
+        const kante = vorher.x + vorher.breite;
+        const t = (mitte - kante) / (dach.x - kante);
+        return bodenY + figurHoehe - vorher.oben - (dach.oben - vorher.oben) * t + 220 * t * (1 - t);
+      }
+      if (mitte <= dach.x + dach.breite) {
+        let sprung = 0;
+        for (const h of dach.hindernisse) {
+          const abstand = Math.max(h.x - polizeiX - 32, polizeiX - h.x - h.breite, 0);
+          if (abstand < 44) sprung = Math.max(sprung, (dach.oben - h.oben) * (1 - (abstand / 44) ** 2));
+        }
+        return bodenY + figurHoehe - dach.oben + sprung;
+      }
+      vorher = dach;
+    }
+    return 0;
+  }
+  let sprung = 0;
+  // Vor jedem Möbel springt der Polizist auf dessen Oberkante.
+  for (const [links, typ] of einrichtung) {
+    if (typ === "baucontainer") continue;
+    const { breite, hoehe } = moebelTypen[typ];
+    const distanz = Math.max(links - (polizeiX + 32), polizeiX - (links + breite), 0);
+    if (distanz < 44) sprung = Math.max(sprung, hoehe * (1 - (distanz / 44) ** 2));
+  }
+  return sprung;
+}
+// Wie im Stadtpanorama pendeln beide Beine gegengleich um die Hüfte.
+function zeichneGehbeine(mitte, hueftY, laenge, schritt, hose, schuh) {
+  stift.save();
+  stift.lineCap = "round";
+  stift.lineWidth = 6;
+  stift.strokeStyle = hose;
+  for (const seite of [-1, 1]) {
+    const hueftX = mitte + seite * 4;
+    const winkel = seite * schritt * (24 * Math.PI / 180);
+    const fussX = hueftX + Math.sin(winkel) * laenge;
+    const fussY = hueftY + Math.cos(winkel) * laenge;
+    stift.beginPath();
+    stift.moveTo(hueftX, hueftY);
+    stift.lineTo(fussX, fussY);
+    stift.stroke();
+    if (schuh) {
+      stift.fillStyle = schuh;
+      stift.fillRect(fussX - 3, fussY, 9, 4);
+    }
+  }
+  stift.restore();
+}
+
+function zeichneGeharme(mitte, schulterY, abstand, laenge, schritt, stoff, hautTon) {
+  for (const seite of [-1, 1]) {
+    stift.save();
+    stift.translate(mitte + seite * abstand, schulterY);
+    stift.rotate(seite * schritt * 24 * Math.PI / 180);
+    stift.lineCap = "round";
+    stift.lineWidth = 5;
+    stift.strokeStyle = stoff;
+    stift.beginPath();
+    stift.moveTo(0, 0);
+    stift.lineTo(-1, laenge * 0.6);
+    stift.lineTo(3, laenge);
+    stift.stroke();
+    oval(3, laenge, 2.8, 3, hautTon);
+    stift.restore();
+  }
+}
+
+function zeichnePolizist(mitte, boden, richtung, schritt, groesse = 1) {
+  stift.save();
+  stift.translate(mitte, boden);
+  stift.scale(richtung * groesse, groesse);
+  zeichneGehbeine(0, -18, 14, schritt, "#24354b", "#18232e");
+  oval(-1, -27, 13, 16, "#26394f");
+  oval(1, -27, 12, 14, "#405879");
+  oval(2, -43, 10.5, 10.8, "#cb9774");
+  oval(6, -41, 8.2, 5.8, "#ddab86");
+  oval(11, -44, 4, 3, "#d39c76");
+  oval(7, -46, 2.1, 1.5, "#fff4dc");
+  oval(8, -46, 1, 1.4, "#24282d");
+  oval(7, -40.8, 5.2, 1.8, "#594131");
+  zeichneGeharme(0, -34, 8, 13, schritt, "#314663", "#d9a47d");
+  stift.fillStyle = "#202d3b";
+  stift.fillRect(-11, -19, 23, 3);
+  stift.fillStyle = "#f4cb69";
+  stift.fillRect(3, -33, 4, 5);
+  stift.fillStyle = "#24354b";
+  oval(0, -53, 12.8, 5.5, "#304764");
+  oval(4, -49, 13, 2.4, "#202d3b");
+  oval(4, -53, 2.1, 2.5, "#edc65e");
+  stift.restore();
+}
+
+let flugobjekt = null;
+let naechsterFlug = Infinity;
+let schuss = null;
+let zielwarnungBis = 0;
+let naechsterSchuss = 0;
+const schussAbstand = { leicht: 10000, mittel: 7000, schwer: 5000 };
+const zielwarnDauer = 1000;
+let klettert = false;
+const leiterDachY = 155;
+
+function bewegeSchuss(t) {
+  if (level !== 3) return;
+  if (schuss) {
+    schuss.x += schuss.tempo;
+    if (Math.abs(schuss.x - x) > 760 || dachFlaechen.some(d => schuss.x >= d.x && schuss.x <= d.x + d.breite && schuss.y >= d.oben)) schuss = null;
+  }
+  if (t < polizeiStart || t < benommenBis) {
+    zielwarnungBis = 0;
+    return;
+  }
+  if (!zielwarnungBis && !schuss && t >= naechsterSchuss - zielwarnDauer && x < torX - 250 && Math.abs(x - polizeiX) < 520) {
+    zielwarnungBis = t + zielwarnDauer;
+    if (ton && ton.state === "running") {
+      klangNote(ton.currentTime, 0.16, 740, 990, "sine", 0.12);
+    }
+  }
+  if (zielwarnungBis && t >= zielwarnungBis) {
+    const richtung = x >= polizeiX ? 1 : -1;
+    schuss = { x: polizeiX + 16 + 20 * richtung, y: bodenY + figurHoehe - polizeiSprunghoehe() - 46, tempo: 8 * richtung };
+    zielwarnungBis = 0;
+    naechsterSchuss = t + schussAbstand[stufe];
+  }
+}
+
+function bewegeFlugobjekt(zeitpunkt) {
+  if (level === 1 || (endlos && endlosStufe() < 3)) return;
+  if (!flugobjekt && zeitpunkt >= naechsterFlug && x < torX - 800) {
+    // Wer weiterläuft, trifft das Objekt etwa 220 Einheiten vor sich.
+    // Dort soll genug Platz zum Ausweichen bleiben.
+    const treffpunkt = x + 220;
+    const frei = einrichtung.every(([links, typ]) =>
+      treffpunkt + 120 < links || treffpunkt - 120 > links + moebelTypen[typ].breite);
+    if (!frei) return;
+    const tief = Math.random() < 0.5;
+    const dach = level === 3 && daecher.find(d => treffpunkt >= d.x && treffpunkt + figurBreite < d.x + d.breite);
+    if (level === 3 && (!dach || sperren.some(s => !s.offen && Math.abs(s.gitterX - treffpunkt) < 160))) return;
+    const boden = dach ? dach.oben : bodenY + figurHoehe;
+    flugobjekt = { x: x + 540, y: boden - (tief ? 25 : 92), tief };
+    const pause = endlos ? Math.max(2500, 11000 - endlosStufe() * 600) : level === 3 ? 12000 + Math.random() * 6000 : 4500 + Math.random() * 3000;
+    naechsterFlug = zeitpunkt + pause;
+  }
+  if (flugobjekt) {
+    flugobjekt.x -= 6;
+    if (flugobjekt.x < x - spielfeld.width) flugobjekt = null;
+  }
+}
+
+function zeichneFlugobjekt() {
+  if (!flugobjekt) return;
+  const { x: links, y: oben } = flugobjekt;
+  const fluegel = Math.sin(links / 19) * 10;
+  stift.save();
+  stift.translate(links, oben);
+  oval(16, 6, 11, 5, "#596b79");
+  oval(7, 3, 5, 5, "#425460");
+  stift.fillStyle = "#c99251";
+  stift.fillRect(0, 3, 5, 2);
+  oval(6, 2, 1, 1, "#f3ede0");
+  stift.fillStyle = "#354650";
+  stift.beginPath();
+  stift.moveTo(12, 5);
+  stift.lineTo(19, fluegel - 2);
+  stift.lineTo(32, fluegel - 4);
+  stift.lineTo(21, 7);
+  stift.fill();
+  stift.restore();
+}
+
+function bereichBei(position) {
+  const platte = Math.floor(position / 200);
+  if (platte === 9) return "Cafeteria";
+  if (platte === 33) return "Wäscherei";
+  if (platte === 54) return "Bücherei";
+  if (platte === 75) return "Wachbereich";
+  return "Zellentrakt";
+}
+
+function zeichneStartzelle() {
+  const boden = bodenY + figurHoehe;
+  stift.fillStyle = "#586369";
+  stift.fillRect(0, boden - 133, zellenausgang, 133);
+  stift.fillStyle = "#9fa9a8";
+  stift.fillRect(4, boden - 128, zellenausgang - 10, 128);
+  stift.fillStyle = "#354451";
+  stift.font = "bold 13px sans-serif";
+  stift.fillText(t("Deine Zelle"), 12, boden - 104);
+  stift.fillText(zelleOffen ? t("Ausgang →") : t("Zum Schloss →"), 48, boden - 77);
+  stift.save();
+  stift.translate(8, boden - 7);
+  stift.scale(0.72, 0.72);
+  zeichneMoebel(0, "bett", 0);
+  stift.restore();
+    // Waschplatz an der Rückwand: Spiegel, Hahn, Becken und Abflussrohr.
+    stift.fillStyle = "#52626a";
+    stift.fillRect(75, boden - 72, 25, 27);
+    stift.fillStyle = "#c3dae0";
+    stift.fillRect(77, boden - 70, 21, 23);
+    stift.fillStyle = "#65777b";
+    stift.fillRect(86, boden - 43, 3, 8);
+    stift.fillRect(82, boden - 43, 7, 3);
+    stift.fillRect(85, boden - 30, 4, 19);
+    oval(86, boden - 33, 13, 5, "#e3e8e1");
+    oval(86, boden - 35, 10, 2, "#96abad");
+    // Toilette mit Spülkasten, Sitz und Standfuß.
+    stift.fillStyle = "#e0e6df";
+    stift.fillRect(124, boden - 40, 12, 19);
+    stift.fillRect(119, boden - 16, 9, 10);
+    oval(121, boden - 18, 13, 8, "#dae2db");
+    oval(121, boden - 23, 14, 4, "#f3f4eb");
+    oval(121, boden - 23, 9, 2, "#81979a");
+    stift.fillStyle = "#617579";
+    stift.fillRect(126, boden - 37, 5, 2);
+    stift.fillStyle = "#354451";
+  const hub = 81 * gitterFortschritt(performance.now());
+  const gitterHoehe = 128 - hub;
+  for (let stab = 0; stab < 4; stab++) stift.fillRect(zellenausgang - 15 + stab * 4, boden - 128, 2, gitterHoehe);
+  stift.fillRect(zellenausgang - 18, boden - 132 + gitterHoehe, 18, 4);
+  for (const strebe of [32, 60, 88]) {
+    if (strebe > hub) stift.fillRect(zellenausgang - 16, boden - 128 + strebe - hub, 16, 2);
+  }
+  if (!zelleOffen) {
+    stift.fillStyle = "#eebd59";
+    stift.fillRect(zellenausgang - 17, boden - 35, 15, 12);
+    stift.fillStyle = "#24313b";
+    stift.fillRect(zellenausgang - 11, boden - 32, 3, 6);
+    if (spielt && anDerTuer()) {
+      const jetzt = performance.now();
+      stift.fillStyle = "#263440";
+      stift.fillRect(20, boden - 195, 228, 47);
+      stift.fillStyle = "white";
+      const hinweis = jetzt - letzterFehlversuch < 650 ? t("Daneben – versuch es erneut") : t("{interact} drücken, wenn der Zeiger im Grün ist");
+      stift.fillText(schlossTreffer + "/3 · " + hinweis, 26, boden - 176, 216);
+      stift.fillStyle = "#76848e";
+      stift.fillRect(26, boden - 168, 200, 10);
+      stift.fillStyle = "#52bb72";
+      stift.fillRect(26 + 200 * zielLinks, boden - 168, 200 * zielBreite, 10);
+      stift.fillStyle = "white";
+      stift.fillRect(25 + 200 * schlossZeiger(jetzt), boden - 172, 3, 18);
+    }
+  }
+}
+
+function zeichneRaum(links, platte, raum) {
+  if (raum === "Zellentrakt") {
+    if (platte === 0) zeichneStartzelle();
+    else if (platte % 3 === 0) zeichneZelle(links + 50, platte / 3);
+    return;
+  }
+  if (platte % 3 !== 0) return;
+  // Die Unterkante des Raums schließt mit dem Boden des Flurs ab.
+  stift.save();
+  stift.translate(links + 45, bodenY + figurHoehe - 296 * 0.55);
+  stift.scale(0.55, 0.55);
+  links = 0;
+  const wandfarben = { Cafeteria: "#c2ccc0", Wäscherei: "#b3c8cf", Bücherei: "#cbbb9f", Wachbereich: "#b8bfc4" };
+  stift.fillStyle = wandfarben[raum];
+  stift.fillRect(links, 70, 200, 226);
+  stift.fillStyle = "#637279";
+  stift.fillRect(links, 293, 200, 3);
+  stift.fillStyle = "#48585d";
+  stift.fillRect(links + 16, 86, 168, 28);
+  stift.fillStyle = "#fff5da";
+  stift.font = "bold 20px sans-serif";
+  stift.fillText(t(raum), links + 25, 108);
+  stift.globalAlpha = 0.72;
+  if (raum === "Cafeteria") {
+    stift.fillStyle = "#596b67";
+    stift.fillRect(links + 8, 141, 178, 83);
+    stift.fillStyle = "#d9d6bd";
+    for (let teller = 0; teller < 4; teller++) stift.fillRect(links + 22, 208 + teller * 4, 38, 2);
+    stift.fillStyle = "#788c87";
+    stift.fillRect(links + 4, 224, 186, 12);
+  } else if (raum === "Wäscherei") {
+    zeichneMoebel(links + 20, "waschmaschine", 265);
+    zeichneMoebel(links + 74, platte % 2 ? "waschmaschine" : "waeschewagen", 265);
+  } else if (raum === "Bücherei") {
+    for (let regal = 0; regal < 3; regal++) zeichneMoebel(links + 9 + regal * 59, "buecherregal", 264);
+  } else {
+    zeichneMoebel(links + 26, "spind", 267);
+    stift.fillStyle = "#485b64";
+    stift.fillRect(links + 83, 168, 67, 39);
+    stift.fillStyle = "#90b7ad";
+    stift.fillRect(links + 87, 172, 59, 31);
+    zeichneMoebel(links + 77, "tisch", 256);
+  }
+  stift.restore();
+}
+
+function zeichneHoftuer(boden, links = torX, innen = true) {
+  const oben = boden - 96;
+  const oeffnung = innen ? Math.max(0, Math.min(1, (x + figurBreite - links + 70) / 70)) : 0;
+  stift.fillStyle = "#536367";
+  stift.fillRect(links - 6, oben - 7, torBreite + 12, 103);
+  stift.fillStyle = "#435357";
+  stift.fillRect(links - 4, oben - 4, torBreite + 8, 100);
+  stift.fillStyle = "#bdb4a7";
+  stift.fillRect(links, oben, torBreite, 96);
+  stift.save();
+  stift.translate(links, oben);
+  stift.fillStyle = "#62666a";
+  for (let stab = 4; stab < torBreite; stab += 8) stift.fillRect(stab, 0, 2, 52);
+  stift.fillRect(0, 12, torBreite, 2);
+  stift.fillRect(0, 38, torBreite, 2);
+  stift.fillStyle = "#b87651";
+  stift.fillRect(0, 52, torBreite, 44);
+  stift.strokeStyle = "#fff1d7";
+  stift.lineWidth = 1.5;
+  stift.strokeRect(5, 56, 78, 35);
+  stift.strokeRect(33, 56, 22, 12);
+  stift.beginPath();
+  stift.ellipse(44, 69, 11, 4, 0, 0, Math.PI);
+  stift.stroke();
+  stift.fillStyle = "#41454a";
+  stift.fillRect(43, 20, 3, 35);
+  stift.fillStyle = "#eee7da";
+  stift.fillRect(29, 16, 30, 19);
+  stift.strokeStyle = "#a04029";
+  stift.strokeRect(38, 23, 12, 8);
+  stift.strokeStyle = "#fff4df";
+  stift.beginPath();
+  for (const versatz of [-5, 0, 5]) {
+    stift.moveTo(44 + versatz, 34);
+    stift.lineTo(44 + versatz * 0.55, 42);
+  }
+  stift.stroke();
+  oval(44, 33, 8, 2, "#cc522a");
+  oval(67, 80, 4, 4, "#e68b39");
+  stift.restore();
+  for (const seite of [-1, 1]) {
+    stift.save();
+    stift.translate(seite === -1 ? links : links + torBreite, oben);
+    stift.scale(-seite * (1 - 0.92 * oeffnung), 1);
+    const breite = torBreite / 2;
+    stift.fillStyle = "#303e42";
+    stift.fillRect(0, 0, breite, 96);
+    stift.fillStyle = seite === -1 ? "#758585" : "#798989";
+    stift.fillRect(2, 2, breite - 4, 92);
+    stift.fillStyle = "#a2adab";
+    stift.fillRect(7, 10, breite - 14, 24);
+    stift.fillStyle = "#33464b";
+    stift.fillRect(9, 12, breite - 18, 20);
+    stift.fillStyle = "#829497";
+    for (const stab of [16, 26]) stift.fillRect(stab, 12, 2, 20);
+    stift.fillStyle = "#36454a";
+    stift.fillRect(breite - 10, 48, 5, 13);
+    stift.fillStyle = "#d1d5cd";
+    stift.fillRect(breite - 18, 52, 12, 3);
+    stift.fillStyle = "#687879";
+    stift.fillRect(3, 79, breite - 6, 14);
+    stift.fillStyle = "#c0c7c1";
+    stift.fillRect(1, 16, 2, 8);
+    stift.fillRect(1, 72, 2, 8);
+    stift.restore();
+  }
+  stift.fillStyle = "#285748";
+  stift.fillRect(links, oben - 26, torBreite, 20);
+  stift.fillStyle = "#fff8dc";
+  stift.font = "bold 13px sans-serif";
+  stift.fillText(innen ? t("Innenhof →") : t("Zellentrakt"), links + 8, oben - 11);
+}
+
+function zeichneZellentrakt(kameraX, bodenKante) {
+  // Betonplatten mit Fugen und runden Schalungsabdrücken.
+  for (let platte = Math.floor(kameraX / 200); platte * 200 <= kameraX + spielfeld.width; platte++) {
+    const links = platte * 200;
+    stift.fillStyle = platte % 2 ? "#b5b7b5" : "#afb2b1";
+    stift.fillRect(links, 0, 200, bodenKante);
+    stift.fillStyle = "#999e9e";
+    stift.fillRect(links, 0, 1, bodenKante);
+    stift.fillRect(links, 145, 200, 1);
+    for (const hoehe of [24, 128, 162, 314]) {
+      stift.beginPath();
+      stift.arc(links + 14, hoehe, 2, 0, 2 * Math.PI);
+      stift.fill();
+    }
+    zeichneRaum(links, platte, bereichBei(links));
+  }
+  // Vergitterte Fenster entlang des Zellentrakts.
+  for (let links = 90; links < torX; links += 310) {
+    if (bereichBei(links) !== "Zellentrakt" || bereichBei(links + 70) !== "Zellentrakt") continue;
+    if (links + 70 < kameraX || links > kameraX + spielfeld.width) continue;
+    stift.fillStyle = "#516473";
+    stift.fillRect(links, 95, 70, 46);
+    stift.fillStyle = "#c5dfe8";
+    stift.fillRect(links + 3, 98, 64, 40);
+    stift.fillStyle = "#516473";
+    for (let stab = 14; stab < 68; stab += 14) stift.fillRect(links + stab, 98, 3, 40);
+  }
+}
+
+// Den unbewegten Landweg einmal vorzeichnen. Pro Bild brauchen wir höchstens zwei Ausschnitte.
+const landwegBild = new Image();
+const landwegBreite = 2080;
+const endlosKulissenMassstab = 1.4;
+const endlosPanoramaBreite = 6408 * endlosKulissenMassstab;
+const endlosKulissenY = -244.4;
+const endlosLandwegBreite = landwegBreite * endlosKulissenMassstab;
+const endlosLandwegPuffer = document.createElement("canvas");
+endlosLandwegPuffer.width = endlosLandwegBreite;
+endlosLandwegPuffer.height = 400 * endlosKulissenMassstab;
+const landwegBeginn = 2136;
+const landwegEnde = landwegBeginn + 8 * landwegBreite;
+const landwegPuffer = document.createElement("canvas");
+landwegPuffer.width = landwegBreite;
+landwegPuffer.height = 421;
+landwegBild.onload = () => {
+  landwegPuffer.getContext("2d").drawImage(landwegBild, 0, 0, landwegBreite, 421);
+  // Dieselbe Vergroesserung wie die Stadt: Fahrbahn und Rand passen an der Naht.
+  endlosLandwegPuffer.getContext("2d").drawImage(landwegBild, 0, 0, endlosLandwegBreite, 400 * endlosKulissenMassstab);
+};
+landwegBild.src = "landweg.svg";
+
+// Kulisse und Spielfiguren verwenden dieselbe Kamera in Weltkoordinaten.
+function zeigeAussenstrecke(kameraX, bodenKante) {
+  const links = 458 + kameraX;
+  const rechts = links + spielfeld.width;
+  const landschaftStart = endlos ? endlosPanoramaBreite : landwegBeginn;
+  const nurLandweg = links >= landschaftStart && (endlos || rechts <= landwegEnde);
+  hofEbene.style.visibility = nurLandweg ? "hidden" : "visible";
+  hofEbene.style.clipPath = endlos ? "inset(0 0 21.5% 0)" : "none";
+  if (!nurLandweg) {
+    const panoramaX = !endlos && rechts > landwegEnde ? links - (landwegEnde - landwegBeginn) : links;
+    hofEbene.setAttribute("viewBox", panoramaX + " 0 800 400");
+  }
+  let position = Math.max(links, landschaftStart);
+  const ende = endlos ? rechts : Math.min(rechts, landwegEnde);
+  const kachelBreite = endlos ? endlosLandwegBreite : landwegBreite;
+  const kachelHoehe = endlos ? 400 * endlosKulissenMassstab : 400;
+  const puffer = endlos ? endlosLandwegPuffer : landwegPuffer;
+  while (position < ende) {
+    const quelle = (position - landschaftStart) % kachelBreite;
+    const breite = Math.min(kachelBreite - quelle, ende - position);
+    stift.drawImage(puffer, quelle, 0, breite, kachelHoehe, position - 458, endlos ? endlosKulissenY : 0, breite, kachelHoehe);
+    position += breite;
+  }
+
+  if (endlos) {
+    // Ein einzelner schmaler Gehweg, mit Gruenstreifen zwischen Weg und Verkehr.
+    const rand = bodenKante - 6;
+    stift.fillStyle = "#8b9f7b";
+    stift.fillRect(kameraX, bodenKante - 22, spielfeld.width, spielfeld.height - bodenKante + 22);
+    stift.fillStyle = "#d2ccbe";
+    stift.fillRect(kameraX, rand, spielfeld.width, 24);
+    stift.fillStyle = "#eee5d1";
+    stift.fillRect(kameraX, rand, spielfeld.width, 3);
+    stift.fillStyle = "#a5a397";
+    for (let fuge = Math.floor(kameraX / 86) * 86; fuge < kameraX + spielfeld.width; fuge += 86) {
+      stift.fillRect(fuge, rand + 3, 1, 21);
+    }
+    stift.fillStyle = "#838c7d";
+    stift.fillRect(kameraX, rand + 24, spielfeld.width, 2);
+    return;
+  }
+  // Der Gehweg gehört wie die Kisten zur Spielebene. Die Schuhsohlen
+  // treffen beim Landen knapp hinter der hinteren Gehwegkante auf.
+  const oben = bodenKante - 2;
+  stift.fillStyle = "#c4bcae";
+  stift.fillRect(kameraX, oben, spielfeld.width, 16);
+  stift.fillStyle = "#998f80";
+  for (let fuge = Math.floor(kameraX / 64) * 64; fuge < kameraX + spielfeld.width; fuge += 64) {
+    stift.fillRect(fuge, oben, 1, 16);
+  }
+  stift.fillStyle = "#817d74";
+  stift.fillRect(kameraX, oben + 16, spielfeld.width, 3);
+}
+
+function zeichneLuftverfolgung(zeit) {
+  // Zwei Maschinen wechseln sich ab. Ihre Flugbahn richtet sich nach der Position des Räubers.
+  const flug = Math.floor(zeit / 14);
+  const phase = zeit % 14;
+  const versatz = -370 + 64 * phase + 35 * Math.sin(phase * .8);
+  const mitte = x + versatz;
+  const hoehe = 79 + (flug % 2) * 18 + 8 * Math.sin(phase * .9);
+  stift.save();
+  stift.translate(mitte, hoehe);
+  const sichtbar = Math.min(1, phase, 14 - phase);
+  stift.globalAlpha = sichtbar;
+  stift.fillStyle = "#fff6b532";
+  stift.beginPath();
+  stift.moveTo(17, 10);
+  stift.lineTo(x - mitte - 15, y + figurHoehe);
+  stift.lineTo(x - mitte + 45, y + figurHoehe);
+  stift.fill();
+  stift.fillStyle = "#334957";
+  stift.beginPath();
+  stift.moveTo(-15, -4);
+  stift.lineTo(-52, -13);
+  stift.lineTo(-49, -4);
+  stift.lineTo(-16, 5);
+  stift.fill();
+  oval(1, 0, 28, 13, flug % 2 ? "#456575" : "#425568");
+  oval(16, -3, 10, 7, "#acd3da");
+  stift.fillStyle = "#f1eee2";
+  stift.font = "bold 7px sans-serif";
+  stift.textAlign = "center";
+  stift.fillText(t("POLIZEI"), -7, 4);
+  stift.fillStyle = "#36424a";
+  stift.fillRect(-2, -20, 4, 9);
+  const rotor = 12 + 32 * Math.abs(Math.cos(zeit * 24));
+  stift.fillRect(-rotor, -20, rotor * 2, 3);
+  stift.fillRect(-14, 11, 3, 6);
+  stift.fillRect(12, 11, 3, 6);
+  stift.fillRect(-20, 17, 41, 2);
+  stift.translate(-50, -10);
+  stift.rotate(zeit * 17);
+  stift.fillRect(-8, -1, 16, 2);
+  stift.fillRect(-1, -8, 2, 16);
+  stift.restore();
+}
+
+function zeichneBenommenSterne(mitte, hoehe, zeitpunkt) {
+  const fortschritt = 1 - (benommenBis - zeitpunkt) / benommenDauer;
+  stift.save();
+  stift.textAlign = "center";
+  stift.textBaseline = "middle";
+  stift.font = "bold 12px sans-serif";
+  stift.lineWidth = 2;
+  stift.strokeStyle = "#604724";
+  stift.fillStyle = "#ffda65";
+  for (let i = 0; i < 3; i++) {
+    const winkel = (fortschritt + i / 3) * 2 * Math.PI;
+    const sx = mitte + 15 * Math.cos(winkel);
+    const sy = hoehe + 4 * Math.sin(winkel);
+    stift.strokeText("★", sx, sy);
+    stift.fillText("★", sx, sy);
+  }
+  stift.restore();
+}
+
+function zeichneDachhindernis(h, boden) {
+  const { x, oben, breite } = h;
+  if (h.art === "abluftrohr") {
+    stift.fillStyle = "#677c82";
+    stift.fillRect(x + 5, oben + 4, breite - 10, boden - oben - 4);
+    stift.fillStyle = "#b5c2c1";
+    stift.fillRect(x + 7, oben + 8, 4, boden - oben - 10);
+    stift.fillStyle = "#42545b";
+    stift.fillRect(x, oben, breite, 5);
+    stift.fillRect(x + 2, boden - 4, breite - 4, 4);
+  } else if (h.art === "dachfenster") {
+    stift.fillStyle = "#424f58";
+    stift.fillRect(x, oben + 4, breite, boden - oben - 4);
+    stift.fillStyle = "#b3d4df";
+    stift.fillRect(x + 2, oben, breite - 4, 6);
+    stift.fillStyle = "#738d9b";
+    for (let steg = x + 12; steg < x + breite; steg += 13) stift.fillRect(steg, oben, 3, 7);
+  } else if (h.art === "parkbake") {
+    stift.fillStyle = "#444c50";
+    for (const bein of [x + 5, x + breite - 10]) {
+      stift.fillRect(bein, oben + 10, 5, boden - oben - 10);
+      stift.fillRect(bein - 3, boden - 4, 11, 4);
+    }
+    stift.fillStyle = "#f4e7c9";
+    stift.fillRect(x, oben, breite, 13);
+    stift.fillStyle = "#ba4f38";
+    for (let streifen = x + 2; streifen < x + breite - 5; streifen += 13) {
+      stift.fillRect(streifen, oben + 1, 6, 11);
+    }
+  } else if (h.art === "poller") {
+    stift.fillStyle = "#64686a";
+    stift.fillRect(x, oben, breite, boden - oben);
+    stift.fillStyle = "#f1bd53";
+    stift.fillRect(x, oben + 4, breite, 5);
+    stift.fillRect(x, oben + 15, breite, 5);
+  } else if (h.art === "kamin") {
+    stift.fillStyle = "#964f3d";
+    stift.fillRect(x + 3, oben + 4, breite - 6, boden - oben - 4);
+    stift.fillStyle = "#ce9175";
+    for (let y = oben + 10; y < boden; y += 9) {
+      stift.fillRect(x + 3, y, breite - 6, 1);
+      stift.fillRect(x + (y % 2 ? 11 : 20), y - 8, 1, 8);
+    }
+    stift.fillStyle = "#62473f";
+    stift.fillRect(x, oben, breite, 6);
+  } else if (h.art === "luefter") {
+    stift.fillStyle = "#506973";
+    stift.fillRect(x, oben, breite, boden - oben);
+    stift.fillStyle = "#a5b7ba";
+    stift.fillRect(x, oben, breite, 3);
+    oval(x + 17, oben + 18, 12, 12, "#2e4048");
+    for (let n = 0; n < 3; n++) {
+      const winkel = n * Math.PI * 2 / 3 + performance.now() / 430;
+      oval(x + 17 + Math.cos(winkel) * 6, oben + 18 + Math.sin(winkel) * 6, 4, 4, "#9aaeb2");
+    }
+    stift.fillStyle = "#2e4048";
+    for (let y = oben + 8; y < boden - 3; y += 5) stift.fillRect(x + 35, y, 17, 2);
+  } else {
+    stift.fillStyle = "#646e74";
+    stift.fillRect(x, oben, breite, 10);
+    for (const fuss of [x, x + breite - 10]) {
+      stift.fillRect(fuss, oben, 10, boden - oben);
+    }
+    stift.fillStyle = "#bcc4bf";
+    stift.fillRect(x + 2, oben + 1, breite - 4, 3);
+  }
+  markiereSprungkante(x, oben, breite);
+}
+
+function zeichneDachstrecke(kameraX) {
+  const rechts = kameraX + spielfeld.width;
+  const himmel = stift.createLinearGradient(0, 0, 0, 400);
+  himmel.addColorStop(0, "#93b7cc");
+  himmel.addColorStop(0.7, "#f2d4ae");
+  himmel.addColorStop(1, "#9b9996");
+  stift.fillStyle = himmel;
+  stift.fillRect(kameraX, 0, spielfeld.width, 400);
+  const blick = kameraX * 0.38;
+  for (let i = Math.floor(blick / 76); i * 76 < blick + spielfeld.width; i++) {
+    const links = kameraX - blick + i * 76;
+    const oben = 105 + (i * 37) % 95;
+    stift.fillStyle = ["#82919b", "#98a4ab", "#929da0"][i % 3];
+    stift.fillRect(links, oben, 65, 400 - oben);
+    stift.fillRect(links + 12, oben - 8, 39, 8);
+    stift.fillStyle = "#c5c3b8";
+    for (let fenster = links + 7; fenster < links + 60; fenster += 14)
+      for (let reihe = oben + 12; reihe < 385; reihe += 24) stift.fillRect(fenster, reihe, 6, 9);
+  }
+  for (const [i, dach] of daecher.entries()) {
+    if (dach.x > rechts || dach.x + dach.breite < kameraX) continue;
+    const { x: links, oben, breite } = dach;
+    if (dach.parkdeck) {
+      const stuetzenHoehe = spielfeld.height - oben - 9;
+      for (let pfeiler = links + 8; pfeiler < links + breite; pfeiler += 80) {
+        stift.fillStyle = "#aaa99d";
+        stift.fillRect(pfeiler, oben + 9, 14, stuetzenHoehe);
+        stift.fillStyle = "#86877f";
+        stift.fillRect(pfeiler + 10, oben + 9, 4, stuetzenHoehe);
+      }
+      stift.fillStyle = "#c6c4b6";
+      stift.fillRect(links, oben, breite, 9);
+      stift.fillStyle = "#ded294";
+      for (let marke = links + 4; marke < links + breite - 12; marke += 34) stift.fillRect(marke, oben, 12, 3);
+      for (const h of dach.hindernisse) zeichneDachhindernis(h, oben);
+      continue;
+    }
+    if (i === daecher.length - 1) {
+      stift.fillStyle = "#aaa99d";
+      stift.fillRect(links, oben, breite, 400 - oben);
+      stift.fillStyle = "#d1cabb";
+      stift.fillRect(links, oben, breite, 5);
+      const garage = links + breite - 235;
+      stift.fillStyle = "#96948d";
+      stift.fillRect(garage, oben - 109, 211, 109);
+      stift.fillStyle = "#4b4a49";
+      stift.fillRect(garage - 5, oben - 115, 221, 8);
+      stift.fillStyle = "#302f32";
+      stift.fillRect(garage + 30, oben - 72, 150, 72);
+      for (let latte = 0; latte < 4; latte++) {
+        stift.fillStyle = latte % 2 ? "#788382" : "#606e6c";
+        stift.fillRect(garage + 30, oben - 72 + latte * 4, 150, 4);
+      }
+      stift.fillStyle = "#355d77";
+      stift.fillRect(garage + 8, oben - 102, 25, 26);
+      stift.fillStyle = "#fff2cc";
+      stift.font = "bold 15px sans-serif";
+      stift.fillText("P", garage + 15, oben - 83);
+      stift.fillText(t("PARKHAUS · EINFAHRT"), garage + 37, oben - 83);
+      continue;
+    }
+    const stil = i % 5;
+    stift.fillStyle = ["#a36d59", "#597986", "#a5977e", "#986659", "#68727d"][stil];
+    stift.fillRect(links, oben, breite, 400 - oben);
+    const fensterBreite = [26, 45, 20, 37, 32][stil];
+    for (let fenster = links + 17; fenster < links + breite - fensterBreite; fenster += fensterBreite + 12 + i % 9) {
+      for (let reihe = oben + 22; reihe < 400; reihe += 49) {
+        stift.fillStyle = "#3c4953";
+        stift.fillRect(fenster, reihe, fensterBreite, 29);
+        stift.fillStyle = stil === 1 ? "#aacbd1" : "#c6c2ab";
+        stift.fillRect(fenster + 3, reihe + 3, fensterBreite - 6, 21);
+        stift.fillStyle = "#585958";
+        stift.fillRect(fenster + fensterBreite / 2, reihe + 3, 2, 22);
+      }
+    }
+    if (stil === 0 || stil === 4) {
+      const treppe = links + breite * 0.62;
+      stift.fillStyle = "#374249";
+      for (let etage = oben + 44; etage < 400; etage += 49) {
+        stift.fillRect(treppe, etage, 66, 4);
+        stift.fillRect(treppe, etage - 12, 66, 2);
+        for (let s = 0; s < 8; s++) {
+          stift.fillRect(treppe + s * 9, etage - 12, 2, 12);
+          stift.fillRect(treppe + s * 7, etage + s * 6, 12, 3);
+        }
+      }
+    } else if (stil === 2 || stil === 3) {
+      const laden = stil === 2 ? "HOTEL" : ["DINER", "SUSHI", "BURGER"][Math.floor(i / 5) % 3];
+      stift.fillStyle = stil === 2 ? "#3f5953" : "#923f38";
+      stift.fillRect(links + 14, oben + 62, 92, 23);
+      stift.fillStyle = "#ffdfa4";
+      stift.font = "bold 15px sans-serif";
+      stift.fillText(laden, links + 23, oben + 79);
+    } else {
+      stift.fillStyle = "#9caeb1";
+      for (let y = oben + 12; y < 400; y += 49) stift.fillRect(links, y, breite, 5);
+    }
+    if (i % 3 === 0) {
+      const mast = links + breite - 64;
+      stift.fillStyle = "#718187";
+      stift.fillRect(mast, oben - 42, 2, 42);
+      for (let n = 0; n < 3; n++) stift.fillRect(mast - 9 - n * 3, oben - 39 + 6 * n, 20 + n * 6, 2);
+    }
+    stift.fillStyle = "#3e464c";
+    stift.fillRect(links, oben, breite, 9);
+    stift.fillStyle = "#d9c6a3";
+    stift.fillRect(links, oben, breite, 3);
+    for (const h of dach.hindernisse) zeichneDachhindernis(h, oben);
+  }
+
+}
+
+function zeichneHofKontur(links, typ, boden) {
+  const { breite: b, hoehe: h } = moebelTypen[typ];
+  const form = new Path2D();
+  if (typ === "parkauto") {
+    form.addPath(parkautoKarosserie());
+    for (const radX of [22, 88]) { form.moveTo(radX + 9, 39); form.arc(radX, 39, 9, 0, Math.PI * 2); }
+  } else if (typ === "verkehrskegel") {
+    form.rect(0, h - 5, b, 5);
+    form.moveTo(14, 0); form.lineTo(20, 0);
+    form.lineTo(29, h - 5); form.lineTo(5, h - 5); form.closePath();
+  } else if (typ === "hydrant") {
+    form.rect(4, h - 5, 24, 5); form.rect(8, 9, 16, h - 12);
+    form.rect(0, 17, b, 14); form.rect(13, 0, 6, 4);
+    form.moveTo(26, 9); form.ellipse(16, 9, 10, 6, 0, 0, Math.PI * 2);
+  } else if (typ === "tisch" || typ === "bank") {
+    form.rect(0, 0, b, 8);
+    form.rect(3, 6, 5, h - 6);
+    form.rect(b - 8, 6, 5, h - 6);
+    if (typ === "bank") form.rect(5, h - 7, b - 10, 3);
+  } else if (typ === "baucontainer") {
+    form.rect(0, 0, b, h - durchfahrtHoehe);
+    for (const x of [7, b - 11]) form.rect(x, h - durchfahrtHoehe, 4, durchfahrtHoehe - 8);
+  } else if (typ === "baustellenbake") {
+    form.rect(0, 0, b, 19);
+    for (const x of [5, 46]) form.rect(x, 19, 5, h - 19);
+  } else if (typ === "bauzaun") {
+    form.rect(4, 2, b - 8, h - 12);
+    form.rect(0, h - 6, 20, 6); form.rect(b - 20, h - 6, 20, 6);
+  } else if (typ === "werkzeugkoffer") {
+    form.rect(12, 0, 15, 6);
+    form.rect(0, 4, b, h - 4);
+  } else if (typ === "muelltonne") {
+    form.rect(0, 0, b, 5);
+    form.moveTo(2, 4); form.lineTo(7, h - 4);
+    form.lineTo(b - 6, h - 4); form.lineTo(b - 2, 4);
+    for (const x of [8, b - 8]) {
+      form.moveTo(x + 4, h - 4);
+      form.arc(x, h - 4, 4, 0, Math.PI * 2);
+    }
+  } else if (typ === "bauarbeiter") {
+    form.addPath(new Path2D("M5 8a8 8 0 0 1 16 0l2 2-5 2-1 4 5 4 2 16-5 1-1-8v10l2 13 3 2v2h-9l-1-16-2 16H4v-3l3-2 1-14-5-1 1-17 5-3-1-5H2V8Z"));
+  } else if (typ === "reifenstapel") {
+    for (let i = 0; i < 3; i++) {
+      const rand = i === 1 ? 2 : 0;
+      form.roundRect(rand, i * 11, b - 2 * rand, 11, 3);
+    }
+  } else {
+    form.rect(0, 0, b, h);
+  }
+  stift.save();
+  stift.translate(links, boden - h);
+  stift.lineJoin = "round";
+  stift.strokeStyle = "#ffffff";
+  stift.lineWidth = 7;
+  stift.stroke(form);
+  stift.strokeStyle = "#172932";
+  stift.lineWidth = 5;
+  stift.stroke(form);
+  stift.restore();
+}
+
+function markiereSprungkante(links, oben, breite) {
+  // Kurze Eckmarken lassen die Form des Gegenstands sichtbar.
+  for (const x of [links, links + breite - 8]) {
+    stift.fillStyle = "#24323a";
+    stift.fillRect(x, oben, 8, 4);
+    stift.fillStyle = "#ffffff";
+    stift.fillRect(x + 1, oben, 6, 2);
+  }
+}
+
+function markiereDurchgang(links, unten, breite) {
+  stift.fillStyle = "#2c3234";
+  stift.fillRect(links, unten - 6, breite, 6);
+  stift.fillStyle = "#ffce53";
+  for (let x = links + 3; x + 6 <= links + breite; x += 12) {
+    stift.fillRect(x, unten - 5, 6, 4);
+  }
+}
+
+function zeichneFigur() {
+  stift.clearRect(0, 0, spielfeld.width, spielfeld.height);
+  const bodenKante = bodenY + figurHoehe;
+  const kameraX = Math.max(0, Math.min(x - 240, levelBreite - spielfeld.width));
+  if (level === 1) {
+    stift.fillStyle = "#b2b5b4";
+    stift.fillRect(0, 0, spielfeld.width, bodenKante);
+    stift.fillStyle = "slategray";
+    stift.fillRect(0, bodenKante, spielfeld.width, spielfeld.height - bodenKante);
+  }
+  stift.save();
+  stift.translate(-kameraX, 0);
+  if (endlos) {
+    zeigeAussenstrecke(kameraX, bodenKante);
+  }
+  else if (level === 1) zeichneZellentrakt(kameraX, bodenKante);
+  else if (level === 3) zeichneDachstrecke(kameraX);
+  else {
+    zeigeAussenstrecke(kameraX, bodenKante);
+    stift.fillStyle = "rgba(222, 231, 227, 0.18)";
+    stift.fillRect(kameraX, 0, spielfeld.width, spielfeld.height);
+    zeichneLuftverfolgung((performance.now() - startZeit) / 1000);
+  }
+  if (!endlos) {
+  stift.fillStyle = "dimgray";
+  stift.fillRect(checkpointX, checkpointBoden - 64, 3, 64);
+  stift.fillStyle = checkpointAktiv ? "#228449" : "#73767a";
+  stift.fillRect(checkpointX + 3, checkpointBoden - 64, 27, 15);
+  }
+  if (level === 1 && torX - 4 <= kameraX + spielfeld.width) zeichneHoftuer(bodenKante);
+  if (!endlos && level === 2 && torX - 176 <= kameraX + spielfeld.width) {
+    const wandX = torX - 170;
+    stift.fillStyle = "#ad7660";
+    stift.fillRect(wandX, leiterDachY, 241, bodenKante - leiterDachY);
+    stift.fillStyle = "#805849";
+    stift.fillRect(wandX + 218, leiterDachY, 23, bodenKante - leiterDachY);
+    for (let reihe = 0; reihe < 2; reihe++) {
+      const oben = leiterDachY + 22 + reihe * 63;
+      for (let spalte = 0; spalte < 3; spalte++) {
+        const links = wandX + 15 + spalte * 49;
+        stift.fillStyle = "#564c46";
+        stift.fillRect(links, oben, 32, 40);
+        stift.fillStyle = "#a7c4c8";
+        stift.fillRect(links + 3, oben + 3, 11, 30);
+        stift.fillRect(links + 17, oben + 3, 12, 30);
+        stift.fillStyle = "#dbc4a6";
+        stift.fillRect(links - 2, oben + 39, 36, 4);
+      }
+    }
+    stift.fillStyle = "#8c594a";
+    stift.fillRect(wandX + 42, leiterDachY - 23, 20, 23);
+    stift.fillStyle = "#3e464c";
+    stift.fillRect(wandX + 39, leiterDachY - 27, 26, 5);
+    stift.fillRect(wandX - 6, leiterDachY, 253, 8);
+    stift.fillStyle = "#d6c287";
+    for (const links of [torX, torX + 33]) stift.fillRect(links, leiterDachY - 16, 4, bodenKante - leiterDachY + 16);
+    for (let sy = bodenKante - 9; sy > leiterDachY - 12; sy -= 14) stift.fillRect(torX + 4, sy, 29, 4);
+  }
+  for (const [links, typ] of einrichtung) {
+    if (links + moebelTypen[typ].breite < kameraX || links > kameraX + spielfeld.width) continue;
+    if (level === 2) {
+      const breite = moebelTypen[typ].breite;
+      oval(links + breite / 2, bodenKante + 1, breite / 2 + 3, 3, "rgba(26, 37, 40, 0.35)");
+      zeichneHofKontur(links, typ, bodenKante);
+    }
+    if (level === 1) zeichneMoebel(links, typ, bodenKante);
+    else if (typ === "baucontainer") {
+      const { breite, hoehe } = moebelTypen[typ];
+      const oben = bodenKante - hoehe;
+      stift.fillStyle = "#88948d";
+      stift.fillRect(links + 7, oben + 10, 4, hoehe - 18);
+      stift.fillRect(links + breite - 11, oben + 10, 4, hoehe - 18);
+      stift.fillStyle = "#69838a";
+      stift.fillRect(links, oben, breite, hoehe - durchfahrtHoehe);
+      stift.fillStyle = "#405b62";
+      for (let rippe = 5; rippe < breite; rippe += 10) stift.fillRect(links + rippe, oben + 3, 2, 46);
+      stift.fillStyle = "#ffdc84";
+      stift.fillRect(links, bodenKante - durchfahrtHoehe - 24, breite, 24);
+      markiereDurchgang(links, bodenKante - durchfahrtHoehe, breite);
+    }
+    else if (typ === "baustellenbake") {
+      const oben = bodenKante - moebelTypen[typ].hoehe;
+      stift.fillStyle = "#47505a";
+      for (const f of [5, 46]) stift.fillRect(links + f, oben + 12, 5, 31);
+      stift.fillStyle = "#fff1d7";
+      stift.fillRect(links, oben, 56, 19);
+      stift.fillStyle = "#c6563d";
+      for (const f of [0, 18, 36]) {
+        stift.beginPath();
+        stift.moveTo(links + f, oben + 19);
+        stift.lineTo(links + f + 9, oben);
+        stift.lineTo(links + f + 18, oben);
+        stift.lineTo(links + f + 9, oben + 19);
+        stift.fill();
+      }
+    }
+    else if (typ === "muelltonne") {
+      const { breite, hoehe } = moebelTypen[typ];
+      const oben = bodenKante - hoehe;
+      stift.fillStyle = "#38654e";
+      stift.beginPath();
+      stift.moveTo(links + 2, oben + 4);
+      stift.lineTo(links + breite - 2, oben + 4);
+      stift.lineTo(links + breite - 6, bodenKante - 4);
+      stift.lineTo(links + 7, bodenKante - 4);
+      stift.fill();
+      stift.fillStyle = "#7aa184";
+      stift.fillRect(links, oben, breite, 5);
+      stift.fillRect(links + 9, oben + 11, 3, 26);
+      oval(links + 8, bodenKante - 4, 4, 4, "#303b3e");
+      oval(links + breite - 8, bodenKante - 4, 4, 4, "#303b3e");
+    }
+    else if (typ === "reifenstapel") {
+      const { breite, hoehe } = moebelTypen[typ];
+      for (let i = 0; i < 3; i++) {
+        const oben = bodenKante - hoehe + i * 11;
+        const rand = i === 1 ? 2 : 0;
+        stift.fillStyle = "#303940";
+        stift.fillRect(links + rand, oben + 2, breite - rand * 2, 9);
+        oval(links + breite / 2, oben + 2, breite / 2 - rand, 2, "#657079");
+        oval(links + breite / 2, oben + 2, 11, 1.5, "#263037");
+        stift.fillStyle = "#505b62";
+        for (let rille = 5; rille < breite - 4; rille += 9) stift.fillRect(links + rille, oben + 5, 3, 4);
+      }
+    }
+    else if (typ === "kistenstapel" || typ === "kiste") {
+      const { breite, hoehe } = moebelTypen[typ];
+      stift.fillStyle = "#865e3d";
+      stift.fillRect(links, bodenKante - hoehe, breite, hoehe);
+      stift.fillStyle = "#c29a6b";
+      stift.fillRect(links + 3, bodenKante - hoehe + 3, breite - 6, 4);
+      stift.fillRect(links + 3, bodenKante - 7, breite - 6, 4);
+      for (let naht = 34; naht < hoehe; naht += 34) {
+        stift.fillRect(links, bodenKante - naht, breite, 3);
+        stift.fillRect(links + (naht % 68 ? 28 : 48), bodenKante - naht, 3, 32);
+      }
+    } else zeichneMoebel(links, typ, bodenKante);
+    if (typ !== "bauarbeiter" && typ !== "parkauto") {
+      const { breite, hoehe } = moebelTypen[typ];
+      markiereSprungkante(links, bodenKante - hoehe, breite);
+    }
+  }
+  for (const plattform of plattformen) {
+    if (plattform.x + plattform.breite < kameraX || plattform.x > kameraX + spielfeld.width) continue;
+    if (plattform.hoehe) {
+      const { x, oben, breite, hoehe } = plattform;
+      stift.fillStyle = "#71838a";
+      stift.fillRect(x, oben, breite, hoehe);
+      stift.fillStyle = "#394c56";
+      stift.fillRect(x + 9, oben + 16, breite - 18, 47);
+      stift.fillStyle = "#9caaab";
+      for (let y = oben + 19; y < oben + 62; y += 7) stift.fillRect(x + 12, y, breite - 24, 3);
+      stift.fillStyle = "#33454e";
+      stift.fillRect(x, oben + hoehe - 8, breite, 8);
+      stift.fillStyle = "#f2c964";
+      for (let links = x + 4; links < x + breite - 5; links += 14) stift.fillRect(links, oben + hoehe - 7, 7, 5);
+      continue;
+    }
+    stift.fillStyle = "#354957";
+    if (level === 2) {
+      // Dünne Seile tragen die Plattform an beiden Enden.
+      for (const ende of [plattform.x + 3, plattform.x + plattform.breite - 5]) {
+        stift.fillRect(ende, 0, 2, plattform.oben);
+      }
+      stift.save();
+      stift.strokeStyle = "#ffffff";
+      stift.lineWidth = 7;
+      stift.strokeRect(plattform.x, plattform.oben, plattform.breite, 10);
+      stift.strokeStyle = "#172932";
+      stift.lineWidth = 5;
+      stift.strokeRect(plattform.x, plattform.oben, plattform.breite, 10);
+      stift.restore();
+    }
+    stift.fillRect(plattform.x, plattform.oben, plattform.breite, 10);
+    stift.fillStyle = plattform.raketenStufe ? "#ffd56b" : "#ffffff";
+    stift.fillRect(plattform.x, plattform.oben, plattform.breite, 3);
+    if (plattform.raketenStufe) {
+      stift.font = "bold 12px sans-serif";
+      stift.fillText(String(plattform.raketenStufe), plattform.x + 3, plattform.oben - 3);
+    }
+    stift.fillStyle = "#849ba6";
+    for (let niete = 6; niete < plattform.breite; niete += 14) {
+      stift.fillRect(plattform.x + niete, plattform.oben + 6, 3, 2);
+    }
+    if (level === 2 && bodenKante - (plattform.oben + 10) === durchfahrtHoehe) {
+      markiereDurchgang(plattform.x, plattform.oben + 10, plattform.breite);
+    }
+  }
+  for (const sperre of sperren) {
+    const { folge, gitterX, offen } = sperre;
+    if (gitterX < kameraX || folge[0].x > kameraX + spielfeld.width) continue;
+    for (const [index, p] of folge.entries()) {
+      stift.fillStyle = index < sperre.schritt ? "#287946" : index === sperre.schritt ? "#ffe15c" : "#bdc7ce";
+      stift.fillRect(p.x, p.oben - 3, p.breite, 4);
+      if (!offen && folge.length > 1) {
+        stift.fillStyle = "#263441";
+        stift.font = "bold 14px sans-serif";
+        stift.fillText(String(index + 1), p.x + 20, p.oben - 8);
+      }
+    }
+    stift.fillStyle = offen ? "#287946" : "#ffe15c";
+    stift.fillRect(gitterX, 60, 11, 10);
+    if (!offen) {
+      stift.fillStyle = "#354451";
+      const unterkante = sperre.boden ?? bodenKante;
+      stift.fillRect(gitterX, 70, 4, unterkante - 70);
+      stift.fillRect(gitterX + 9, 70, 4, unterkante - 70);
+      for (let strebe = 80; strebe < unterkante; strebe += 22) stift.fillRect(gitterX, strebe, 13, 3);
+      stift.font = "bold 13px sans-serif";
+      if (folge.length === 1) stift.fillText(t("Hier landen ↓"), folge[0].x, folge[0].oben - 10);
+    }
+  }
+  const jetzt = performance.now();
+  if (polizeiStart !== Infinity) {
+    const fuss = bodenKante - polizeiSprunghoehe();
+    zeichnePolizist(polizeiX + 16, fuss, polizeiRichtung, Math.sin(polizeiSchritt / 10));
+    if (zielwarnungBis) {
+      const richtung = x >= polizeiX ? 1 : -1;
+      stift.fillStyle = "#373d42";
+      stift.fillRect(polizeiX + 16, fuss - 48, 24 * richtung, 5);
+      const sternX = Math.max(kameraX + 20, Math.min(kameraX + spielfeld.width - 20, polizeiX + 16));
+      const sternY = Math.max(56, fuss - 88);
+      stift.save();
+      stift.textAlign = "center";
+      stift.font = "bold 25px sans-serif";
+      stift.lineWidth = 3;
+      stift.strokeStyle = "#563921";
+      stift.strokeText("★", sternX, sternY);
+      stift.fillStyle = "#ffcb45";
+      stift.fillText("★", sternX, sternY);
+      stift.restore();
+    }
+    if (jetzt < benommenBis) zeichneBenommenSterne(polizeiX + 16, fuss - 67, jetzt);
+  }
+  zeichneAbkuerzungen(kameraX);
+  zeichneMuenzen(kameraX);
+  zeichnePowerUps(kameraX);
+  zeichneFlugobjekt();
+  if (schuss) {
+    stift.fillStyle = "#783c26";
+    stift.fillRect(schuss.x - 6, schuss.y - 3, 12, 6);
+    stift.fillStyle = "#ffda67";
+    stift.fillRect(schuss.x - 5, schuss.y - 1, 10, 2);
+  }
+  zeichneRaeuber();
+  if (spielt && sprintPhase === "warnung" && jetzt >= benommenBis) {
+    const warnX = Math.max(kameraX + 15, Math.min(kameraX + spielfeld.width - 15, polizeiX + 16));
+    const warnY = bodenKante - polizeiSprunghoehe() - 70;
+    stift.fillStyle = "#9c201b";
+    stift.beginPath();
+    stift.arc(warnX, warnY, 12, 0, Math.PI * 2);
+    stift.fill();
+    stift.fillStyle = "white";
+    stift.textAlign = "center";
+    stift.font = "bold 20px sans-serif";
+    stift.fillText("!", warnX, warnY + 7);
+  }
+  stift.restore();
+}
+
+const gedrueckt = new Set();
+let tempoY = 0;
+
+// 181 Zustände bei 60 Schritten pro Sekunde: jetzt und drei Sekunden zuvor.
+const verlauf = [];
+function merkeZustand(t) {
+  if (uhrVerbraucht && zeitLadungen === 0) return;
+  verlauf.push({ t, x, y, springt, geduckt, tempoY, blickrichtung, laufStrecke, checkpointAktiv,
+    polizeiX, polizeiSchritt, polizeiRichtung, polizeiStart, benommenBis, kopfsprungBereit, sprintPhase, phasenEnde,
+    raketeBis, federSpruenge, naechsterFlug, flugobjekt: flugobjekt && { ...flugobjekt },
+    naechsterSchuss, zielwarnungBis, schuss: schuss && { ...schuss }, klettert,
+    gesammelt: fundstuecke.map(f => !!f.gesammelt), raketenSchritte: fundstuecke.map(f => f.schritt),
+    schalter: sperren.map(s => s.schritt) });
+  if (verlauf.length > 181) verlauf.shift();
+}
+function sichereRueckspulPosition() {
+  const flaechen = [...dachFlaechen, ...plattformen];
+  if (flaechen.some(f => x >= f.x && x + figurBreite <= f.x + f.breite &&
+      Math.abs(y + figurHoehe - f.oben) < 0.01)) return false;
+  const plaetze = [];
+  for (const f of flaechen) {
+    if (f.oben < figurHoehe) continue;
+    for (let links = Math.min(x, f.x + f.breite - figurBreite - 2); links >= f.x + 2; links--) {
+      const oben = f.oben - figurHoehe;
+      const blockiert = flaechen.some(b => b !== f && links < b.x + b.breite && links + figurBreite > b.x &&
+        oben < (plattformen.includes(b) ? b.oben + (b.hoehe ?? 10) : spielfeld.height) && f.oben > b.oben);
+      if (!blockiert) {
+        plaetze.push({ x: links, y: oben });
+        break;
+      }
+    }
+  }
+  plaetze.sort((a, b) => b.x - a.x || Math.abs(a.y - y) - Math.abs(b.y - y));
+  if (!plaetze.length) return false;
+  ({ x, y } = plaetze[0]);
+  springt = geduckt = false;
+  tempoY = 0;
+  kopfsprungBereit = false;
+  return true;
+}
+
+function spuleZurueck(jetzt) {
+  if ((!uhrBereit && zeitLadungen === 0) || verlauf.length < 181) return;
+
+  const alt = verlauf[0];
+  ({ x, y, springt, geduckt, tempoY, blickrichtung, laufStrecke, checkpointAktiv, polizeiX,
+    polizeiSchritt, polizeiRichtung, sprintPhase, federSpruenge, flugobjekt, schuss, klettert } = alt);
+  // Effektzeiten an den wiederhergestellten Moment anpassen. Die Leveluhr läuft weiter.
+  const versatz = jetzt - alt.t;
+  polizeiStart = alt.polizeiStart + versatz;
+  benommenBis = alt.benommenBis + versatz;
+  kopfsprungBereit = alt.kopfsprungBereit;
+  phasenEnde = alt.phasenEnde + versatz;
+  raketeBis = alt.raketeBis + versatz;
+  naechsterFlug = alt.naechsterFlug + versatz;
+  naechsterSchuss = alt.naechsterSchuss + versatz;
+  zielwarnungBis = alt.zielwarnungBis ? alt.zielwarnungBis + versatz : 0;
+  fundstuecke.forEach((fund, i) => { if (fund.art !== "Rückspuluhr") fund.gesammelt = alt.gesammelt[i]; });
+  fundstuecke.forEach((fund, i) => { if (fund.folge) fund.schritt = alt.raketenSchritte[i]; });
+  sperren.forEach((s, i) => { s.schritt = alt.schalter[i]; s.offen = s.schritt === s.folge.length; });
+  if (level === 3 && sichereRueckspulPosition()) {
+    polizeiX = Math.min(polizeiX, x - 72);
+    polizeiStart = jetzt + 2000;
+    schuss = flugobjekt = null;
+    zielwarnungBis = 0;
+    naechsterSchuss = jetzt + schussAbstand[stufe];
+    naechsterFlug = jetzt + 12000;
+  }
+  if (uhrBereit) {
+    uhrBereit = false;
+    uhrVerbraucht = true;
+  } else {
+    zeitLadungen--;
+  }
+  verlauf.length = 0;
+}
+
+const gehalteneTasten = new Set();
+function leereSpielTasten() { gedrueckt.clear(); gehalteneTasten.clear(); }
+document.addEventListener("keydown", taste => {
+  if (document.getElementById("tastenDialog").open || taste.target.closest("#einstellungen")) return;
+  const aktion=aktionZuTaste(taste.code);
+  if(aktion==="pause" && (spielt || !document.getElementById("spielPause").hidden)) {
+    taste.preventDefault(); if(taste.repeat)return;
+    if(document.getElementById("spielPause").hidden)pausiereSpiel();else setzeSpielFort();return;
+  }
+  if(!spielt || performance.now()<durchgangBis || !aktion)return;
+  taste.preventDefault();
+  if(aktion==="rakete" && !taste.repeat){zuendeReserveRakete(performance.now());return;}
+  if(aktion==="interagieren" && !taste.repeat){if(!nutzeAbkuerzung(performance.now()))knackeSchloss(performance.now());return;}
+  if(aktion==="rueckspulen" && !taste.repeat){spuleZurueck(performance.now());return;}
+  if(!["links","rechts","springen","ducken"].includes(aktion))return;
+  gehalteneTasten.add(taste.code);gedrueckt.add(aktion);
+  if(aktion==="springen" && !taste.repeat)versucheSprung();
+});
+document.addEventListener("keyup",taste=>{
+  gehalteneTasten.delete(taste.code);
+  for(const aktion of ["links","rechts","springen","ducken"])
+    if(!tasten[aktion].some(code=>gehalteneTasten.has(code)))gedrueckt.delete(aktion);
+});
+window.addEventListener("blur",leereSpielTasten);
+
+function versucheSprung(zeitpunkt = performance.now()) {
+  if (geduckt || gedrueckt.has("ducken")) return;
+  if (springt && !(kopfsprungBereit && zeitpunkt < benommenBis &&
+      x < polizeiX + 30 && x + figurBreite > polizeiX + 4 &&
+      y + figurHoehe <= bodenY + figurHoehe - polizeiSprunghoehe() - 53)) return;
+  kopfsprungBereit = false;
+  springt = true;
+  const sprungkraft = (charakterWahl.value === "springer" ? 12 : 10) + (rundenVorteil === "sprung" ? 1 : 0);
+  tempoY = -(sprungkraft + (federSpruenge > 0 ? 3 : 0));
+  if (federSpruenge > 0) federSpruenge--;
+}
+
+function bewegeFigur(zeitpunkt) {
+  // Beim Loslassen erst aufstehen, wenn der Kopf wieder Platz hat.
+  const unterDurchfahrt = geduckt && (
+    (y === bodenY && einrichtung.some(([links, typ]) => typ === "baucontainer" && x + figurBreite > links && x < links + moebelTypen[typ].breite))
+    || (level !== 1 && plattformen.some(p => x + figurBreite > p.x && x < p.x + p.breite && y < p.oben + (p.hoehe ?? 10) && y + figurHoehe > p.oben))
+  );
+  geduckt = !springt && (unterDurchfahrt || gedrueckt.has("ducken"));
+  if (gedrueckt.has("springen")) versucheSprung(zeitpunkt);
+  const altesX = x;
+  const laufTempo = zeitpunkt < raketeBis ? 7 : 4;
+
+  if (gedrueckt.has("rechts")) {
+    // Am Ausgang kann die Figur vollständig durch die Tür laufen.
+    x = Math.min(levelBreite, x + laufTempo);
+  }
+  if (gedrueckt.has("links")) {
+    x = Math.max(endlos ? Math.max(0, endlosWeite - 2500) : 0, x - laufTempo);
+  }
+  if (gitterFortschritt(zeitpunkt) < 1) x = Math.min(x, zellenausgang - 15 - figurBreite);
+
+  for (const sperre of sperren) {
+    if (!sperre.offen && altesX + figurBreite <= sperre.gitterX) {
+      x = Math.min(x, sperre.gitterX - figurBreite);
+    }
+  }
+  // Die sichtbaren Möbelmaße gelten auch beim Anstoßen und Landen.
+  let landeHoehe = bodenY;
+  if (level === 3) {
+    landeHoehe = Infinity;
+    for (const dach of dachFlaechen) {
+      const rechts = dach.x + dach.breite;
+      if (y + figurHoehe > dach.oben) {
+        if (altesX + figurBreite <= dach.x && x + figurBreite > dach.x) x = dach.x - figurBreite;
+        if (altesX >= rechts && x < rechts) x = rechts;
+      } else if (x + figurBreite > dach.x && x < rechts) {
+        landeHoehe = Math.min(landeHoehe, dach.oben - figurHoehe);
+      }
+    }
+  }
+  for (const [links, typ] of einrichtung) {
+    const rechts = links + moebelTypen[typ].breite;
+    const oben = bodenY + figurHoehe - moebelTypen[typ].hoehe;
+    if (typ === "baucontainer" && kopfY() >= bodenY + figurHoehe - durchfahrtHoehe) continue;
+    if (y + figurHoehe > oben) {
+      if (altesX + figurBreite <= links && x + figurBreite > links) x = links - figurBreite;
+      if (altesX >= rechts && x < rechts) x = rechts;
+    } else if (x + figurBreite > links && x < rechts) {
+      landeHoehe = Math.min(landeHoehe, oben - figurHoehe);
+    }
+  }
+
+  // Außen sind auch die Kanten und die Unterseite der Plattformen fest.
+  for (const plattform of plattformen) {
+    if (level !== 1) {
+      const unten = plattform.oben + (plattform.hoehe ?? 10);
+      if (kopfY() < unten && y + figurHoehe > plattform.oben) {
+        if (altesX + figurBreite <= plattform.x) x = Math.min(x, plattform.x - figurBreite);
+        if (altesX >= plattform.x + plattform.breite) x = Math.max(x, plattform.x + plattform.breite);
+      }
+      if (x + figurBreite > plattform.x && x < plattform.x + plattform.breite &&
+          tempoY < 0 && y >= unten && y + tempoY <= unten) {
+        y = unten;
+        tempoY = 0;
+      }
+    }
+    if (x + figurBreite > plattform.x && x < plattform.x + plattform.breite && y + figurHoehe <= plattform.oben) {
+      landeHoehe = Math.min(landeHoehe, plattform.oben - figurHoehe);
+    }
+  }
+  if (x !== altesX) blickrichtung = Math.sign(x - altesX);
+  laufStrecke = x === altesX ? 0 : laufStrecke + Math.abs(x - altesX);
+  if (!springt && y < landeHoehe) {
+    springt = true;
+    tempoY = 0;
+  }
+
+  if (springt) {
+    y = y + tempoY;
+    tempoY = tempoY + 0.5;
+    if (y >= landeHoehe) {
+      y = landeHoehe;
+      tempoY = 0;
+      springt = false;
+      for (const sperre of sperren) {
+        if (sperre.offen) continue;
+        const m = sperre.folge[sperre.schritt];
+        if (y + figurHoehe === m.oben && x + figurBreite > m.x && x < m.x + m.breite) {
+          sperre.schritt++;
+          sperre.offen = sperre.schritt === sperre.folge.length;
+        }
+      }
+    }
+  }
+
+}
+
+// 60 Bewegungsschritte pro Sekunde, unabhängig vom Bildschirmtempo.
+const schrittMs = 1000 / 60;
+let letzterZeitpunkt = startZeit;
+let restMs = 0;
+let pauseSeit = 0;
+let escPauseSeit = 0;
+let spielFrame = 0;
+function pausiereSpiel() {
+  if (!spielt) return;
+  escPauseSeit = performance.now();
+  spielt = false;
+  cancelAnimationFrame(spielFrame);
+  leereSpielTasten();
+  document.getElementById("einstellungen").open = false;
+  document.getElementById("spielPause").hidden = false;
+  document.getElementById("pauseWeiter").focus();
+}
+function setzeSpielFort() {
+  const menue = document.getElementById("spielPause");
+  if (menue.hidden) return;
+  const jetzt = performance.now();
+  const pause = jetzt - escPauseSeit;
+  startZeit += pause;
+  raketeBis += pause;
+  polizeiStart += pause;
+  benommenBis += pause;
+  phasenEnde += pause;
+  naechsterFlug += pause;
+  naechsterSchuss += pause;
+  if (zielwarnungBis) zielwarnungBis += pause;
+  entriegeltAm += pause;
+  zeigerStart += pause;
+  letzterFehlversuch += pause;
+  if (durchgangBis) durchgangBis += pause;
+  if (endlosRekordBis) endlosRekordBis += pause;
+  // Auch die gespeicherten Rückspul-Momente behalten ihre Effektlaufzeiten.
+  for (const zustand of verlauf) {
+    for (const feld of ["t", "polizeiStart", "benommenBis", "phasenEnde", "raketeBis", "naechsterFlug", "naechsterSchuss"])
+      zustand[feld] += pause;
+    if (zustand.zielwarnungBis) zustand.zielwarnungBis += pause;
+  }
+  letzterZeitpunkt += pause;
+  menue.hidden = true;
+  leereSpielTasten();
+  spielfeld.tabIndex = -1;
+  spielfeld.focus({ preventScroll: true });
+  spielt = true;
+  spielFrame = requestAnimationFrame(spielSchritt);
+}
+document.getElementById("pauseWeiter").onclick = setzeSpielFort;
+document.getElementById("pauseVerlassen").onclick = zurLevelauswahl;
+document.getElementById("spielPause").addEventListener("keydown", event => {
+  if (!["ArrowUp", "ArrowDown", "Tab"].includes(event.key)) return;
+  event.preventDefault();
+  const weiter = document.getElementById("pauseWeiter");
+  const verlassen = document.getElementById("pauseVerlassen");
+  (document.activeElement === weiter ? verlassen : weiter).focus();
+});
+function zielErreicht() {
+  if (endlos) return false;
+  if (level === 2) return klettert && y + figurHoehe <= leiterDachY;
+  return x >= torX + torBreite;
+}
+
+function aktualisiereTrefferText() {
+  const weiter=document.getElementById("weiterspielen");
+  weiter.hidden = leben === 0;
+  weiter.textContent = endlos ? t("Hier weiterfliehen") : checkpointAktiv ? t("Vom letzten Checkpoint weiter") : t("Vom Levelanfang weiter");
+  document.getElementById("trefferTitel").textContent = leben === 0 ? t("Keine Herzen mehr") : t("Ein Herz verloren");
+  document.getElementById("restHerzen").textContent = leben === 0 ? t("Der Versuch ist vorbei. ") + (proberunde ? t("Proberunde ohne Münzgutschrift.") : coinsAusgezahlt ? rundenCoins + t(" Coins gutgeschrieben.") : t("Coins konnten nicht gespeichert werden.")) :
+    (leben === 1 ? t("Du hast noch ein Herz.") : t("Du hast noch ") + leben + t(" Herzen."));
+  if (endlos) {
+    document.getElementById("restHerzen").textContent += t(" Strecke: ") + meterText(endlosWeite) + ".";
+  }
+}
+function pruefeKontakt(zeitpunkt, fussVorher, polizeiKopfVorher) {
+  if (!endlos && x >= checkpointX) checkpointAktiv = true;
+  if (zielErreicht() || (level === 2 && x >= torX)) return;
+  const fuss = y + figurHoehe;
+  const faellt = fuss > fussVorher;
+  const polizeiFuss = bodenY + figurHoehe - polizeiSprunghoehe();
+  const polizeiKopf = polizeiFuss - 53;
+  const beiPolizei = zeitpunkt >= polizeiStart &&
+    x < polizeiX + 30 && x + figurBreite > polizeiX + 4;
+  const beiVogel = flugobjekt && x < flugobjekt.x + 30 && x + figurBreite > flugobjekt.x;
+  const aufPolizei = beiPolizei && faellt && fussVorher <= polizeiKopfVorher && fuss >= polizeiKopf;
+  const aufVogel = beiVogel && faellt && fussVorher <= flugobjekt.y && fuss >= flugobjekt.y;
+  const erwischt = beiPolizei && zeitpunkt >= benommenBis && !aufPolizei && kopfY() < polizeiFuss && fuss > polizeiKopf;
+  const kugelTreffer = schuss && x < schuss.x + 6 && x + figurBreite > schuss.x - 6 &&
+    kopfY() < schuss.y + 2 && fuss > schuss.y - 2;
+  const getroffen = kugelTreffer || (beiVogel && !aufVogel && kopfY() < flugobjekt.y + (flugobjekt.tief ? 8 : 12) && fuss > flugobjekt.y);
+  if (!erwischt && !getroffen && (aufPolizei || aufVogel)) {
+    y = (aufPolizei ? polizeiKopf : flugobjekt.y) - figurHoehe;
+    springt = true;
+    geduckt = false;
+    tempoY = -6;
+    if (aufPolizei && zeitpunkt >= benommenBis) {
+      kopfsprungBereit = true;
+      benommenBis = zeitpunkt + benommenDauer;
+      phasenEnde += benommenDauer;
+      polizeiSchritt = 0;
+    }
+    return;
+  }
+  const abgestuerzt = level === 3 && y >= spielfeld.height;
+  if (!erwischt && !getroffen && !abgestuerzt) return;
+  flugobjekt = null;
+  schuss = null;
+  zielwarnungBis = 0;
+  leben--;
+  if (leben === 0) zahleRundenCoins();
+  benommenBis = -Infinity;
+  kopfsprungBereit = false;
+  if (erwischt) spieleErwischt();
+  spielt = false;
+  leereSpielTasten();
+  pauseSeit = performance.now();
+  const weiter = document.getElementById("weiterspielen");
+  aktualisiereTrefferText();
+  if(endlos && leben===0)speichereEndlosRekord();
+  document.getElementById("lebenspause").hidden = false;
+  (leben > 0 ? weiter : document.getElementById("abbrechen")).focus();
+}
+
+function weiterNachTreffer() {
+  const menue = document.getElementById("lebenspause");
+  if (menue.hidden || leben === 0) return;
+  menue.hidden = true;
+  const zeitpunkt = performance.now();
+  const pause = zeitpunkt - pauseSeit;
+  startZeit += pause;
+  raketeBis += pause;
+  naechsterSchuss = zeitpunkt + schussAbstand[stufe];
+  naechsterFlug = zeitpunkt + (level === 3 ? 12000 : 6000);
+
+  if (!endlos) x = checkpointAktiv ? checkpointX : 40;
+  geduckt = false;
+  if (endlos) {
+    // Nach einem Treffer an derselben Stelle auf dem Hindernis bzw. Boden weiterlaufen.
+    const stand = einrichtung.filter(([links, typ]) => x + figurBreite > links && x < links + moebelTypen[typ].breite);
+    y = stand.reduce((oben, [, typ]) => Math.min(oben, bodenY - moebelTypen[typ].hoehe), bodenY);
+  } else y = level === 3 ? (checkpointAktiv ? checkpointBoden : daecher[0].oben) - figurHoehe : bodenY;
+  springt = false;
+  tempoY = 0;
+  laufStrecke = 0;
+  polizeiX = x - (endlos ? 180 : 36);
+  polizeiSchritt = 0;
+  if (checkpointAktiv || level !== 1) {
+    polizeiStart = zeitpunkt + 2000;
+    planeSprint(polizeiStart);
+  } else {
+    polizeiStart = Infinity;
+    naechsterFlug = Infinity;
+    sprintPhase = "laufen";
+  }
+  letzterZeitpunkt = zeitpunkt;
+  restMs = 0;
+  spielt = true;
+  spielFrame = requestAnimationFrame(spielSchritt);
+}
+function zeichneStatusSymbole(art, anzahl, maximum, mitte) {
+  const abstand = 28;
+  stift.save();
+  for (let i = 0; i < maximum; i++) {
+    const cx = mitte + (i - (maximum - 1) / 2) * abstand;
+    const aktiv = i < anzahl;
+    stift.beginPath();
+    if (art === "herz") {
+      stift.moveTo(cx, 32);
+      stift.bezierCurveTo(cx - 22, 18, cx - 8, 6, cx, 16);
+      stift.bezierCurveTo(cx + 8, 6, cx + 22, 18, cx, 32);
+    } else {
+      for (let punkt = 0; punkt < 10; punkt++) {
+        const winkel = -Math.PI / 2 + punkt * Math.PI / 5;
+        const radius = punkt % 2 === 0 ? 12 : 5.5;
+        const px = cx + Math.cos(winkel) * radius;
+        const py = 22 + Math.sin(winkel) * radius;
+        if (punkt === 0) stift.moveTo(px, py); else stift.lineTo(px, py);
+      }
+    }
+    stift.closePath();
+    const farbe = stift.createLinearGradient(0, 10, 0, 34);
+    farbe.addColorStop(0, aktiv ? (art === "herz" ? "#ffb0b6" : "#fff2a5") : "#53616b");
+    farbe.addColorStop(1, aktiv ? (art === "herz" ? "#db3b59" : "#e8a52c") : "#2e3b46");
+    stift.fillStyle = farbe;
+    stift.strokeStyle = aktiv ? (art === "herz" ? "#ffc2c9" : "#ffe6a1") : "#78838b";
+    stift.lineWidth = 1.2;
+    stift.fill(); stift.stroke();
+  }
+  stift.restore();
+}
+function zeichneHudText(text, x, y, groesse = 14, ausrichtung = "left") {
+  stift.save();
+  stift.font = "bold " + groesse + "px sans-serif";
+  stift.textAlign = ausrichtung;
+  const farbe = stift.createLinearGradient(0, y - groesse, 0, y);
+  farbe.addColorStop(0, "#496879");
+  farbe.addColorStop(1, "#20333f");
+  stift.fillStyle = farbe;
+  stift.fillText(text, x, y);
+  stift.restore();
+}
+function zeichneZeitUndCoins(zeit) {
+  stift.save();
+  // Kleine Uhr ohne Hintergrundkasten.
+  stift.fillStyle = "#fff3d8";
+  stift.strokeStyle = "#476477";
+  stift.lineWidth = 2;
+  stift.beginPath(); stift.arc(26, 21, 10, 0, Math.PI * 2); stift.fill(); stift.stroke();
+  stift.beginPath(); stift.moveTo(26, 15); stift.lineTo(26, 21); stift.lineTo(31, 24); stift.stroke();
+  zeichneHudText(zeit, 44, 29, 23);
+  const text = rundenCoins + " " + t("Coins");
+  stift.font = "bold 17px sans-serif";
+  const cx = spielfeld.width - 28 - stift.measureText(text).width;
+  const coinY = endlos ? 21 : 67;
+  const gold = stift.createLinearGradient(0, coinY - 10, 0, coinY + 9);
+  gold.addColorStop(0, "#fff3a1"); gold.addColorStop(1, "#e5a52d");
+  stift.fillStyle = gold; stift.strokeStyle = "#a97124";
+  stift.beginPath(); stift.ellipse(cx, coinY, 7, 9, 0, 0, Math.PI * 2); stift.fill(); stift.stroke();
+  stift.strokeStyle = "#fff2b4";
+  stift.beginPath(); stift.moveTo(cx, coinY - 5); stift.lineTo(cx, coinY + 5); stift.stroke();
+  zeichneHudText(text, spielfeld.width - 16, coinY + 6, 17, "right");
+  stift.restore();
+}
+function spielSchritt(zeitpunkt) {
+  if (!spielt) return;
+  if (zeitpunkt < durchgangBis) {
+    letzterZeitpunkt = zeitpunkt;
+    restMs = 0;
+    stift.save();
+    stift.fillStyle = "#172932";
+    stift.fillRect(0, 0, spielfeld.width, spielfeld.height);
+    stift.textAlign = "center";
+    stift.fillStyle = "#f5d484";
+    stift.font = "24px sans-serif";
+    stift.fillText(t("Durch den Geheimgang …"), spielfeld.width / 2, 190);
+    stift.restore();
+    spielFrame = requestAnimationFrame(spielSchritt);
+    return;
+  }
+  restMs += Math.min(zeitpunkt - letzterZeitpunkt, 100);
+  letzterZeitpunkt = zeitpunkt;
+  while (spielt && restMs >= schrittMs && !zielErreicht()) {
+    const schrittZeit = zeitpunkt - restMs + schrittMs;
+    if (!endlos && level === 2 && x >= torX) {
+      klettert = true;
+      x = torX;
+      springt = geduckt = false;
+      tempoY = 0;
+      laufStrecke += 2;
+      y = Math.max(leiterDachY - figurHoehe, y - 2);
+      restMs -= schrittMs;
+      continue;
+    }
+    const fussVorher = y + figurHoehe;
+    const polizeiKopfVorher = bodenY + figurHoehe - polizeiSprunghoehe() - 53;
+    if (endlos) erweitereEndlosStrecke();
+    bewegeFigur(schrittZeit);
+    if (endlos) {
+      endlosWeite = Math.max(endlosWeite, x);
+      if (!endlosRekordGemeldet && endlosWeite > endlosBestweite) {
+        endlosRekordGemeldet = true;
+        endlosRekordBis = schrittZeit + 2500;
+      }
+    }
+    verlasseStartzelle(schrittZeit);
+    sammlePowerUps(schrittZeit);
+    sammleMuenzen();
+    bewegeFlugobjekt(zeitpunkt - restMs + schrittMs);
+    bewegePolizist(zeitpunkt - restMs + schrittMs);
+    bewegeSchuss(schrittZeit);
+    pruefeKontakt(schrittZeit, fussVorher, polizeiKopfVorher);
+    if (spielt) merkeZustand(schrittZeit);
+    restMs -= schrittMs;
+  }
+  zeichneFigur();
+  stift.save();
+  if (endlos) stift.translate(0, 31);
+  zeichneStatusSymbole("herz", leben, maxLeben, spielfeld.width - 16 - (maxLeben * 28 + 16) / 2);
+  stift.restore();
+  stift.textAlign = "left";
+  const spielzeitMs = performance.now() - startZeit;
+  const rekordzeitMs = spielzeitMs;
+  const rekord = endlos ? null : leseBestzeit(level, stufe);
+  const grenze = sternZeiten[stufe];
+  const sterne = leben === 0 ? 0 : spielzeitMs <= grenze.drei ? 3 : spielzeitMs <= grenze.zwei ? 2 : 1;
+  const gesamtSekunden = Math.floor(spielzeitMs / 1000);
+  const minuten = Math.floor(gesamtSekunden / 60);
+  const sekunden = String(gesamtSekunden % 60).padStart(2, "0");
+
+  stift.fillStyle = "black";
+  stift.font = "20px sans-serif";
+  zeichneZeitUndCoins(minuten + ":" + sekunden);
+  stift.save();
+  stift.textAlign = "right";
+  stift.font = "14px sans-serif";
+  if (endlos) zeichneHudText(t("Beste Weite: ") + meterText(endlosBestweite), 16, 51, 13);
+  else zeichneHudText(rekord === null ? t("Noch keine Bestzeit") : t("Bestzeit ") + zeitText(rekord), spielfeld.width - 16, 51, 13, "right");
+  stift.restore();
+  if (endlos) {
+    zeichneHudText(meterText(endlosWeite), spielfeld.width / 2, 29, 25, "center");
+    zeichneHudText(t("Stufe ") + endlosStufe(), spielfeld.width / 2, 50, 13, "center");
+  } else zeichneStatusSymbole("stern", sterne, 3, spielfeld.width / 2);
+  const status = [];
+  if (reserveRakete) status.push(t("{rocket}: Reserve-Rakete"));
+  const ladungen = zeitLadungen + Number(uhrBereit);
+  if (ladungen > 0) status.push(t("{rewind}: 3 s zurück ({n}×)", {n:ladungen}));
+  if (zeitpunkt < raketeBis) status.push(t("Rakete: ") + Math.ceil((raketeBis - zeitpunkt) / 1000) + " s");
+  if (federSpruenge > 0) status.push(t("Federsprünge: ") + federSpruenge);
+  stift.font = "bold 16px sans-serif";
+  zeichneHudText(status.join(" · "), 16, endlos ? 73 : 51, 14);
+  stift.font = "14px sans-serif";
+  if (!endlos) zeichneHudText(t("Rekordzeit: ") + zeitText(rekordzeitMs), 16, 73, 13);
+  stift.save();
+  stift.font = "14px sans-serif";
+  stift.textAlign = "left";
+  const vorteilHinweis = rundenVorteilText();
+  if (vorteilHinweis) {
+    zeichneHudText(vorteilHinweis, 20, 101, 14);
+  }
+  stift.restore();
+  if (endlos && zeitpunkt < endlosRekordBis) {
+    stift.save();
+    stift.textAlign = "center";
+    stift.font = "bold 27px sans-serif";
+    stift.globalAlpha = Math.min(1, (endlosRekordBis - zeitpunkt) / 400);
+    const gold = stift.createLinearGradient(0, 104, 0, 132);
+    gold.addColorStop(0, "#fff29b"); gold.addColorStop(1, "#efb52a");
+    stift.fillStyle = gold;
+    stift.shadowColor = "#78511988"; stift.shadowBlur = 3;
+    stift.fillText(t("Neuer Rekord!"), spielfeld.width / 2, 130);
+    stift.restore();
+  }
+  if (!spielt) return;
+  if (zielErreicht()) {
+    zahleRundenCoins();
+    spielt = false;
+    spieleDurchgang();
+    stift.fillStyle = "black";
+    stift.font = "28px sans-serif";
+    stift.fillText(t("Level {n} geschafft!", {n:level}), 280, 100);
+    stift.fillText("★".repeat(sterne), 280, 140);
+    stift.save();
+    stift.font = "18px sans-serif";
+    stift.textAlign = "center";
+    stift.fillText(proberunde ? t("Proberunde ohne Münzgutschrift") : coinsAusgezahlt ? "+" + rundenCoins + t(" Coins · Guthaben: ") + coinKonto.coins : t("Coins konnten nicht gespeichert werden"), spielfeld.width / 2, 350);
+    stift.restore();
+    if (!proberunde) {
+      speichereRuhm(spielerName, level, stufe, Math.ceil(rekordzeitMs));
+      try { localStorage.setItem("level" + level + "Sterne-" + stufe, Math.max(leseSterne(level, stufe), sterne)); } catch {}
+      const neu = rekord === null || rekordzeitMs < rekord;
+      if (neu) {
+        try { localStorage.setItem("level" + level + "Bestzeit-geheimwege1-" + stufe, Math.ceil(rekordzeitMs)); } catch {}
+      }
+      stift.font = "20px sans-serif";
+      stift.fillText((neu ? t("Neuer Rekord! ") : t("Laufzeit ")) + zeitText(rekordzeitMs), 280, 175);
+    }
+    document.getElementById("nachZiel").hidden = false;
+    return;
+  }
+  spieleJagdmusik(zeitpunkt);
+  spielFrame = requestAnimationFrame(spielSchritt);
+}
+
+const ausstattung = document.querySelector("#ausstattung");
+const hauptmenue = document.getElementById("hauptmenue");
+document.getElementById("menueCoins").textContent = "◉ " + coinKonto.coins + " " + t("Coins");
+const levelmenue = document.getElementById("levelmenue");
+const namenswahl = document.getElementById("namenswahl");
+const ruhm = document.getElementById("ruhm");
+const coinShop = document.getElementById("coinShop");
+function aktualisiereShop() {
+  document.getElementById("kaufStornieren").hidden = !coinKonto.vorgemerkt;
+  document.getElementById("coinGuthaben").textContent = "◉ " + coinKonto.coins + " " + t("Coins");
+  for (const b of coinShop.querySelectorAll("[data-kauf]")) {
+    if (!b.dataset.titel) b.dataset.titel = b.querySelector(".shoptitel").textContent;
+    const art = b.dataset.kauf;
+    b.querySelector(".shoptitel").textContent = t(b.dataset.titel) + (coinKonto.vorgemerkt === art ? " · " + t("Nächste Runde ✓") : "");
+    b.querySelector(".shoppreis").textContent = shopPreise[art] + " " + t("Coins");
+    b.disabled = !!coinKonto.vorgemerkt || coinKonto.coins < shopPreise[art];
+  }
+}
+for (const b of coinShop.querySelectorAll("[data-kauf]")) b.onclick = () => {
+  const art = b.dataset.kauf;
+  if (coinKonto.vorgemerkt || coinKonto.coins < shopPreise[art]) return;
+  const neu = { ...coinKonto, coins: coinKonto.coins - shopPreise[art], vorgemerkt: art, bezahlt: shopPreise[art] };
+  try {
+    localStorage.setItem("coinKonto", JSON.stringify(neu));
+    coinKonto = neu;
+    document.getElementById("shopMeldung").textContent = t("Gekauft! Genau dieser Vorteil gilt für deinen nächsten Lauf.");
+  } catch { document.getElementById("shopMeldung").textContent = t("Dein Browser konnte den Kauf nicht speichern."); }
+  aktualisiereShop();
+};
+document.getElementById("kaufStornieren").onclick = () => {
+  if (!coinKonto.vorgemerkt) return;
+  const neu = { ...coinKonto, coins: coinKonto.coins + coinKonto.bezahlt, vorgemerkt: null, bezahlt: 0 };
+  try {
+    localStorage.setItem("coinKonto", JSON.stringify(neu));
+    coinKonto = neu;
+    document.getElementById("shopMeldung").textContent = t("Kauf zurückgenommen. Deine Coins sind wieder da.");
+  } catch {}
+  aktualisiereShop();
+};
+document.getElementById("zuShop").onclick = () => { aktualisiereShop(); zeigeMenue(coinShop); };
+document.getElementById("shopZurueck").onclick = () => zeigeMenue(hauptmenue);
+let spielerName = spielerProfil.name || "";
+let geplanterStart = null;
+try { spielerName = localStorage.getItem("letzterSpielername") || ""; } catch {}
+function leseRuhm() {
+  try {
+    const daten = JSON.parse(localStorage.getItem("hallOfFame-geheimwege1") || "[]");
+    return Array.isArray(daten) ? daten.filter(e => e && typeof e.name === "string" &&
+      [1, 2, 3].includes(e.level) && ["leicht", "mittel", "schwer"].includes(e.stufe) &&
+      Number.isFinite(e.zeit) && e.zeit > 0) : [];
+  } catch { return []; }
+}
+function speichereRuhm(name, nummer, schwierigkeit, zeit) {
+  const daten = leseRuhm();
+  const bisher = daten.find(e => e.name.toLocaleLowerCase() === name.toLocaleLowerCase() &&
+    e.level === nummer && e.stufe === schwierigkeit);
+  if (bisher) bisher.zeit = Math.min(bisher.zeit, zeit);
+  else daten.push({ name, level: nummer, stufe: schwierigkeit, zeit });
+  try { localStorage.setItem("hallOfFame-geheimwege1", JSON.stringify(daten)); } catch {}
+}
+function uebernehmeAlteRekorde() {
+  try {
+    if (localStorage.getItem("alteRekordeUebernommen")) return;
+    for (let n = 1; n <= 3; n++) for (const s of ["leicht", "mittel", "schwer"]) {
+      const zeit = leseBestzeit(n, s);
+      if (zeit !== null) speichereRuhm("Ohne Namen", n, s, zeit);
+    }
+    localStorage.setItem("alteRekordeUebernommen", "ja");
+  } catch {}
+}
+function zeigeRuhm() {
+  const liste = document.getElementById("rekordliste");
+  liste.replaceChildren();
+  document.querySelector("#ruhm > p").textContent = t("Top 10 der endlosen Flucht. Die größte Entfernung steht auf Platz 1. Dein Name gehört zu deinem Spielerprofil. Ein neuer Name benennt deinen Eintrag um.");
+    const rangliste = leseEndlosRekorde().sort((a, b) => b.weite - a.weite || a.zeit - b.zeit).slice(0, 10);
+    const tabelle = document.createElement("table");
+    const kopf = tabelle.createTHead().insertRow();
+    for (const text of [t("Platz"), t("Spieler"), t("Entfernung")]) {
+      const zelle = document.createElement("th"); zelle.scope = "col"; zelle.textContent = t(text); kopf.append(zelle);
+    }
+    const koerper = tabelle.createTBody();
+    for (let i = 0; i < 10; i++) {
+      const e = rangliste[i];
+      const zeile = koerper.insertRow();
+      const werte = [["🥇 1", "🥈 2", "🥉 3"][i] || String(i + 1), e ? e.name : t("Platz frei"), e ? meterText(e.weite) : "—"];
+      werte.forEach((text,spalte) => { const zelle=zeile.insertCell(); zelle.textContent=text;
+        if(e && spalte===1)zelle.dataset.spielername="true"; });
+    }
+    liste.append(tabelle);
+    zeigeMenue(ruhm);
+}
+function aktualisiereNamenshinweis() {
+  document.getElementById("namenshinweis").textContent = (endlos ? t("Endlose Flucht · normaler Räuber · nur ein Leben · zunehmende Schwierigkeit. ") : "") + (spielerName
+    ? t("Name beibehalten oder deinen bisherigen Eintrag umbenennen?") : t("Gib einen Namen für deine Rekorde ein."));
+}
+function frageSpieler(gewaehlteStufe) {
+  geplanterStart = { stufe: gewaehlteStufe, endlos, level };
+  document.getElementById("spielername").value = spielerName;
+  aktualisiereNamenshinweis();
+  zeigeMenue(namenswahl);
+  document.getElementById("spielername").focus();
+}
+namenswahl.onsubmit = event => {
+  event.preventDefault();
+  const feld = document.getElementById("spielername");
+  const name = feld.value.trim().replace(/\s+/g, " ").slice(0, 24);
+  if (!name) { feld.setCustomValidity(t("Bitte gib einen Spielernamen ein.")); feld.reportValidity(); return; }
+  if (!geplanterStart) return;
+  spielerName = name;
+  profilUmbenennen(name);
+  const start = geplanterStart;
+  geplanterStart = null;
+  endlos = start.endlos;
+  level = start.level;
+  starteLevel(start.stufe);
+};
+document.getElementById("spielername").oninput = event => event.target.setCustomValidity("");
+namenswahl.addEventListener("keydown", event => {
+  if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+  const felder = Array.from(namenswahl.querySelectorAll("input, button"));
+  const index = felder.indexOf(document.activeElement);
+  if (index < 0) return;
+  event.preventDefault();
+  const richtung = event.key === "ArrowDown" ? 1 : -1;
+  felder[(index + richtung + felder.length) % felder.length].focus();
+});
+document.getElementById("neuerName").onclick = () => {
+  const feld = document.getElementById("spielername"); feld.value = ""; feld.setCustomValidity(""); feld.focus();
+};
+document.getElementById("nameZurueck").onclick = () => { geplanterStart = null; zeigeMenue(endlos ? hauptmenue : schwierigkeitsmenue); };
+document.getElementById("zuRuhm").onclick = zeigeRuhm;
+document.getElementById("ruhmZurueck").onclick = () => zeigeMenue(hauptmenue);
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !coinShop.hidden) {
+    event.preventDefault();
+    zeigeMenue(hauptmenue);
+    document.getElementById("zuShop").focus();
+  }
+});
+document.addEventListener("keydown", event => {
+  if (event.key === "Escape" && !ruhm.hidden) {
+    event.preventDefault();
+    zeigeMenue(hauptmenue);
+    document.getElementById("zuRuhm").focus();
+  }
+});
+function zeitText(ms) {
+  const hundertstel = Math.ceil(ms / 10);
+  return Math.floor(hundertstel / 6000) + ":" + String(Math.floor(hundertstel / 100) % 60).padStart(2, "0") +
+    (sprache === "en" ? "." : ",") + String(hundertstel % 100).padStart(2, "0");
+}
+function leseBestzeit(nummer, schwierigkeit) {
+  try {
+    const wert = Number(localStorage.getItem("level" + nummer + "Bestzeit-geheimwege1-" + schwierigkeit));
+    return Number.isFinite(wert) && wert > 0 ? wert : null;
+  } catch { return null; }
+}
+function leseSterne(nummer, schwierigkeit) {
+  const zusatz = schwierigkeit ? "-" + schwierigkeit : "";
+  try { return Math.max(0, Math.min(3, parseInt(localStorage.getItem("level" + nummer + "Sterne" + zusatz), 10) || 0)); }
+  catch { return 0; }
+}
+function levelSterne(nummer) {
+  return Object.keys(sternZeiten).filter(stufe => leseSterne(nummer, stufe) > 0).length;
+}
+const freischaltLevel = { raeuber: 0, springer: 1, ausdauer: 2, zeit: 3 };
+for (const option of charakterWahl) {
+  const nummer = freischaltLevel[option.value];
+  option.disabled = nummer > 0 && !levelSterne(nummer) && !leseSterne(nummer);
+  option.closest("label").querySelector("small").textContent = nummer === 0 ? t("Von Anfang an verfügbar") :
+    option.disabled ? t("Schaffe Level ") + nummer : t("Freigeschaltet nach Level ") + nummer;
+}
+try {
+  const gespeichert = localStorage.getItem("raeuberCharakter");
+  if (localStorage.getItem("raeuberSkinTyp") === "eigen") skinWahl.value = "eigen";
+  if (Array.from(charakterWahl).some(o => o.value === gespeichert && !o.disabled)) charakterWahl.value = gespeichert;
+} catch {}
+const schwierigkeitsmenue = document.getElementById("schwierigkeit");
+const faehigkeiten = document.getElementById("faehigkeiten");
+function zeigeMenue(menue) {
+  const coinAnzeige = document.getElementById("menueCoins");
+  coinAnzeige.hidden = menue !== hauptmenue;
+  coinAnzeige.textContent = "◉ " + coinKonto.coins + " " + t("Coins");
+  document.querySelector("main").classList.toggle("im-menue", menue !== null);
+  for (const seite of [ausstattung, faehigkeiten, hauptmenue, levelmenue, schwierigkeitsmenue, namenswahl, ruhm, coinShop]) seite.hidden = seite !== menue;
+  if (menue === levelmenue) {
+    levelmenue.querySelectorAll(".levelsterne").forEach((anzeige, index) => {
+      const sterne = levelSterne(index + 1);
+      anzeige.textContent = "★".repeat(sterne) + "☆".repeat(3 - sterne);
+    });
+    document.getElementById("dachTitel").textContent = levelSterne(2) < 3
+      ? t("3 · Dachstrecke ausprobieren (Proberunde)") : t("3 · Über die Dächer zum Versteck");
+  }
+  if (menue === ausstattung) zeichneVorschau();
+  uebersetzeOberflaeche();
+}
+function zeichneVorschau() {
+  const bild = document.getElementById("vorschau");
+  const pinsel = bild.getContext("2d");
+  pinsel.clearRect(0, 0, bild.width, bild.height);
+  zeichneRaeuber(pinsel, 57, 52, 7, charakterWahl.value, eigenerSkin());
+}
+document.getElementById("endlosLevel").onclick = () => {
+  endlos = true;
+  level = 2;
+  proberunde = false;
+  frageSpieler("leicht");
+};
+document.getElementById("zuLevel").onclick = () => zeigeMenue(levelmenue);
+document.getElementById("zuFigur").onclick = () => zeigeMenue(ausstattung);
+function zeichneFaehigkeiten() {
+  for (const option of charakterWahl) {
+    const bild = option.closest("label").querySelector("canvas");
+    const pinsel = bild.getContext("2d");
+    pinsel.clearRect(0, 0, bild.width, bild.height);
+    zeichneRaeuber(pinsel, 30, option.value === "springer" ? 10 : 20, 2.8, option.value,
+      skinWahl.value === "eigen" ? eigenerSkin() : figurenSkins[option.value]);
+  }
+}
+document.getElementById("zuFaehigkeiten").onclick = () => {
+  zeigeMenue(faehigkeiten);
+  zeichneFaehigkeiten();
+  faehigkeiten.querySelector(":checked").focus();
+};
+faehigkeiten.addEventListener("change", () => zeichneFaehigkeiten());
+faehigkeiten.addEventListener("submit", (ereignis) => {
+  ereignis.preventDefault();
+  try {
+    localStorage.setItem("raeuberCharakter", charakterWahl.value);
+    localStorage.setItem("raeuberSkinTyp", skinWahl.value);
+  } catch {}
+  zeigeMenue(hauptmenue);
+  document.getElementById("zuFaehigkeiten").focus();
+});
+document.getElementById("zurueck").onclick = () => zeigeMenue(hauptmenue);
+ausstattung.addEventListener("input", zeichneVorschau);
+ausstattung.addEventListener("submit", (ereignis) => {
+  ereignis.preventDefault();
+  ausstattung.hidden = true;
+  try {
+    localStorage.setItem("raeuberFarbe", farbe.value);
+    for (const feld of aussehen) localStorage.setItem("raeuber-" + feld.id, feld.value);
+    localStorage.setItem("raeuberNummer", nummer.value);
+  } catch {}
+  zeichneFigur();
+  zeigeMenue(hauptmenue);
+});
+function waehleLevel(nummer) {
+  endlos = false;
+  level = nummer;
+  proberunde = level === 3 && levelSterne(2) < 3;
+  for (const knopf of schwierigkeitsmenue.querySelectorAll("[data-stufe]")) {
+    const best = leseSterne(level, knopf.dataset.stufe);
+    knopf.querySelector(".schwierigkeitssterne").textContent = "★".repeat(best) + "☆".repeat(3 - best);
+    const rekord = leseBestzeit(level, knopf.dataset.stufe);
+    knopf.querySelector("small").textContent = rekord === null ? t("Noch keine Bestzeit") : t("Bestzeit ") + zeitText(rekord);
+  }
+  schwierigkeitsmenue.querySelector(".kennung").textContent = t("Level") + " 0" + level + (proberunde ? t(" / Proberunde ohne Wertung") : t(" / Verfolgung"));
+  zeigeMenue(schwierigkeitsmenue);
+  schwierigkeitsmenue.querySelector("button").focus();
+}
+document.getElementById("levelStart").onclick = () => waehleLevel(1);
+document.getElementById("levelZwei").onclick = () => waehleLevel(2);
+document.getElementById("levelDrei").onclick = () => waehleLevel(3);
+document.getElementById("zurLevelwahl").onclick = () => {
+  zeigeMenue(levelmenue);
+  document.getElementById(["levelStart", "levelZwei", "levelDrei"][level - 1]).focus();
+};
+for (const knopf of schwierigkeitsmenue.querySelectorAll("[data-stufe]")) {
+  knopf.onclick = () => frageSpieler(knopf.dataset.stufe);
+}
+function starteLevel(gewaehlteStufe) {
+  const panorama = hofEbene.querySelector("image");
+  panorama.setAttribute("width", endlos ? endlosPanoramaBreite : "2840");
+  // Der fahrende Verkehr liegt hinter dem eigenen Gehweg im Vordergrund.
+  panorama.setAttribute("height", endlos ? 400 * endlosKulissenMassstab : "421");
+  panorama.setAttribute("y", endlos ? endlosKulissenY : "0");
+  panorama.setAttribute("href", panoramaAdresse(endlos ? "endloswelt" : "spielhof"));
+  if (endlos) {
+    charakterWahl.value = "raeuber";
+    x = 40; y = bodenY; springt = geduckt = klettert = false; tempoY = 0;
+    endlosWeite = 40; endlosErzeugtBis = 450; endlosHindernisse = 0; endlosGespeichert = false;
+    endlosAutoBei = 6 + Math.floor(Math.random() * 4);
+    endlosBaustelleBei = 3;
+    endlosPlattformBei = 6;
+    const eigenerRekord = leseEndlosRekorde().find(e => e.spielerId === spielerProfil.id);
+    endlosBestweite = eigenerRekord?.weite ?? 40;
+    endlosRekordGemeldet = !eigenerRekord;
+    endlosRekordBis = 0;
+    einrichtung.length = plattformen.length = sperren.length = fundstuecke.length = muenzen.length = verlauf.length = 0;
+    checkpointX = Infinity; checkpointAktiv = false; polizeiX = -80;
+    zelleOffen = true; schlossTreffer = 0; entriegeltAm = -Infinity;
+    zielBreite = zielBreiten[0]; zielLinks = Math.random() * (1 - zielBreite);
+    startPhase = 0; letzterFehlversuch = -Infinity;
+    polizeiStart = Infinity; phasenEnde = Infinity; naechsterFlug = Infinity;
+  }
+  streckenSaat = 73421 + level * 1009 + ["leicht", "mittel", "schwer"].indexOf(gewaehlteStufe) * 7919;
+  abkuerzungen.length = 0;
+  durchgangBis = 0;
+  rundenCoins = 0;
+  coinsAusgezahlt = false;
+  starteRundenVorteil();
+  maxLeben = endlos ? 1 : (charakterWahl.value === "ausdauer" ? 4 : 3) + (rundenVorteil === "herz" ? 1 : 0);
+  leben = maxLeben;
+  zeitLadungen = (charakterWahl.value === "zeit" ? 2 : 0) + (rundenVorteil === "rueckspulen" ? 1 : 0);
+  reserveRakete = rundenVorteil === "reserve";
+  stufe = gewaehlteStufe;
+  zeigeMenue(null);
+  // Die rechte Kamerakante endet am Landweg, vor dem alten Häuserblock.
+  levelBreite = level === 2 ? landwegEnde - 458 : 17680;
+  torX = levelBreite - torBreite;
+  if (endlos) erweitereEndlosStrecke();
+  else {
+    if (level === 3) erzeugeDachstrecke(); else erzeugeStrecke();
+    platziereAbkuerzungen();
+    platziereMuenzen();
+  }
+  startZeit = performance.now();
+  document.querySelector("main").classList.toggle("aussenlevel", level === 2);
+  if (level !== 1) {
+    zelleOffen = true;
+    polizeiStart = startZeit + 2000;
+    naechsterSchuss = startZeit + schussAbstand[stufe];
+    naechsterFlug = startZeit + (level === 3 ? 12000 : 6000);
+    planeSprint(polizeiStart);
+  }
+  zeigerStart = startZeit;
+  letzterZeitpunkt = startZeit;
+  stoppeMenueSong();
+  document.getElementById("einstellungen").open = false;
+  spielt = true;
+  zeichneFigur();
+  spielFrame = requestAnimationFrame(spielSchritt);
+}
+function zurLevelauswahl() {
+  speichereEndlosRekord();
+  zahleRundenCoins();
+  location.hash = "levelauswahl";
+  location.reload();
+}
+document.getElementById("weiterspielen").onclick = weiterNachTreffer;
+document.getElementById("abbrechen").onclick = zurLevelauswahl;
+document.getElementById("nachZiel").onclick = zurLevelauswahl;
+if (location.hash === "#levelauswahl") {
+  zeigeMenue(levelmenue);
+  history.replaceState(null, "", location.href.split("#")[0]);
+}
+zeichneFigur();
+
+function aktualisiereSprache() {
+  document.getElementById("sprache").value=sprache;
+  uebersetzeOberflaeche();zeigeTageszeit();
+  document.getElementById("menueCoins").textContent = "◉ " + coinKonto.coins + " " + t("Coins");
+  hofEbene.querySelector("image").setAttribute("href",panoramaAdresse(endlos ? "endloswelt" : "spielhof"));
+  if(!ruhm.hidden)zeigeRuhm();
+  if(!namenswahl.hidden)aktualisiereNamenshinweis();
+  if(!document.getElementById("lebenspause").hidden)aktualisiereTrefferText();
+  if(!coinShop.hidden)aktualisiereShop();
+  if(!schwierigkeitsmenue.hidden)waehleLevel(level);
+  for(const option of charakterWahl){const n=freischaltLevel[option.value];
+    option.closest("label").querySelector("small").textContent=n===0 ? t("Von Anfang an verfügbar") :
+      (option.disabled ? t("Schaffe Level ") : t("Freigeschaltet nach Level "))+n;
+  }
+  if(document.getElementById("tastenDialog").open)zeichneTasten();
+}
+document.getElementById("sprache").onchange=event=>{
+  sprache=spielSprachen.includes(event.target.value)?event.target.value:"de";
+  try{localStorage.setItem("sprache",sprache);}catch{}
+  aktualisiereSprache();
+};
+aktualisiereSprache();
+</script>
+</body>
+</html>
