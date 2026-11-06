@@ -126,7 +126,9 @@ function uebersetzeOberflaeche() {
     }
   }
 }
+let panoramaDatei = "menue-rundfahrt.svg?v=20261106-neustart";
+let spielhofDatei = "spielhof.svg?v=20261106-neustart";
 function panoramaAdresse(ansicht = "menue") {
   const ziel = sprache !== "de" ? ansicht + "-" + sprache : ansicht === "menue" ? "" : ansicht;
-  return "menue-rundfahrt.svg?v=20261106-ausbau6" + (ziel ? "#"+ziel : "");
+  return (ansicht === "spielhof" ? spielhofDatei : panoramaDatei) + (ziel ? "#"+ziel : "");
 }

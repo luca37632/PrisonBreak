@@ -1,3 +1,14 @@
+// Einmaliger Neustart der Level; danach bleibt neuer Fortschritt gespeichert.
+try {
+  if (localStorage.getItem("fortschritt-reset-20261106") !== "fertig") {
+    for (const key of Object.keys(localStorage)) {
+      if (/^level[123](Sterne|Bestzeit)/.test(key)) localStorage.removeItem(key);
+    }
+    localStorage.removeItem("raeuberCharakter");
+    localStorage.setItem("alteRekordeUebernommen", "ja");
+    localStorage.setItem("fortschritt-reset-20261106", "fertig");
+  }
+} catch {}
 // Neue Rangliste: alte Eintraege entfernen, neue Rekorde bleiben gespeichert.
 try {
   localStorage.removeItem("endlosRekorde-v1");

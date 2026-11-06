@@ -33,10 +33,12 @@
     #zuLevel, #levelStart, #ausstattung button, #faehigkeiten button { background: var(--signal); border-color: var(--signal); color: #202d32; font-weight: bold; }
     #faehigkeiten { width: 840px; }
     .figurenreihe { display: grid; grid-template-columns: repeat(4, minmax(142px, 1fr)); gap: 10px; overflow-x: auto; padding: 3px; }
-    .figurenreihe label { display: flex; flex-direction: column; gap: 7px; padding: 10px; border: 2px solid #657881; border-radius: 7px; background: #283e4a; cursor: pointer; }
+    .figurenreihe label { position: relative; display: flex; flex-direction: column; gap: 7px; padding: 10px; border: 2px solid #657881; border-radius: 7px; background: #283e4a; cursor: pointer; }
     .figurenreihe label:has(:checked) { border-color: var(--signal); }
     .figurenreihe label:has(:disabled) { background: #26343c; cursor: default; }
     .figurenreihe canvas { width: 100%; height: 130px; object-fit: contain; border: 0; background: radial-gradient(ellipse at center, #526975, #253944); }
+    .figurenreihe label:has(:disabled)::after { content: "🔒"; position: absolute; top: 55px; left: 50%; transform: translateX(-50%); font-size: 36px; filter: drop-shadow(0 2px 4px #000); }
+    .figurenreihe label:has(:disabled) canvas { opacity: .4; }
     .figurenreihe small { margin-top: auto; color: #ffc995; }
     .menue button:hover:enabled { filter: brightness(1.13); }
     #schwierigkeit button[data-stufe], #levelmenue .levelwahl { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -195,7 +197,7 @@
       <p>Jede geschaffte Schwierigkeit bringt einen Levelstern.</p>
       <button id="levelStart" class="levelwahl">1 · Aus der Zelle zum Innenhof <span class="levelsterne">☆☆☆</span></button>
       <button id="levelZwei" class="levelwahl">2 · Zum Stadtrand <span class="levelsterne">☆☆☆</span></button>
-      <button id="levelDrei" class="levelwahl"><span id="dachTitel">3 · Dachstrecke ausprobieren</span><span class="levelsterne">☆☆☆</span></button>
+      <button id="levelDrei" class="levelwahl"><span id="dachTitel">3 · Über die Dächer zum Versteck</span><span class="levelsterne">☆☆☆</span></button>
       <button id="zurueck">Zurück zum Hauptmenü</button>
     </section>
     <section class="menue" id="schwierigkeit" hidden>
@@ -280,10 +282,11 @@
       <button id="tastenFertig" type="button">Fertig</button>
     </dialog>
   </main>
-  <script src="spielerprofil.js"></script>
-  <script src="weitere-sprachen.js"></script>
-  <script src="sprache.js"></script>
-  <script src="steuerung.js"></script>
+  <script src="spielerprofil.js?v=20261106-neustart"></script>
+  <script src="weitere-sprachen.js?v=20261106-neustart"></script>
+  <script src="sprache.js?v=20261106-neustart"></script>
+  <script src="fussball.js?v=20261106-neustart"></script>
+  <script src="steuerung.js?v=20261106-neustart"></script>
   <script>
   const hofEbene = document.getElementById("spielhof");
   const spielfeld = document.querySelector("canvas");
@@ -1491,7 +1494,9 @@ const songAuswahl = document.getElementById("menueSong");
 const nachtansicht = document.getElementById("nachtansicht");
 try { nachtansicht.checked = localStorage.getItem("nachtansicht") === "an"; } catch {}
 function zeigeTageszeit() {
-  document.querySelector("main").style.backgroundImage = `url("${panoramaAdresse(nachtansicht.checked ? "nacht" : "menue")}")`;
+  const hauptflaeche = document.querySelector("main");
+  hauptflaeche.style.backgroundImage = hauptflaeche.classList.contains("im-menue")
+    ? `url("${panoramaAdresse(nachtansicht.checked ? "nacht" : "menue")}")` : "none";
   document.querySelector("main").classList.toggle("nacht", nachtansicht.checked);
 }
 zeigeTageszeit();
@@ -3290,6 +3295,9 @@ function pruefeKontakt(zeitpunkt, fussVorher, polizeiKopfVorher) {
   schuss = null;
   zielwarnungBis = 0;
   leben--;
+  // Nach einem Treffer muessen alle Sprungschalter erneut betaetigt werden.
+  for (const sperre of sperren) { sperre.offen = false; sperre.schritt = 0; }
+  verlauf.length = 0;
   if (leben === 0) zahleRundenCoins();
   benommenBis = -Infinity;
   kopfsprungBereit = false;
@@ -3728,14 +3736,16 @@ function zeigeMenue(menue) {
   coinAnzeige.hidden = menue !== hauptmenue;
   coinAnzeige.textContent = "◉ " + coinKonto.coins + " " + t("Coins");
   document.querySelector("main").classList.toggle("im-menue", menue !== null);
+  zeigeTageszeit();
   for (const seite of [ausstattung, faehigkeiten, hauptmenue, levelmenue, schwierigkeitsmenue, namenswahl, ruhm, coinShop]) seite.hidden = seite !== menue;
   if (menue === levelmenue) {
     levelmenue.querySelectorAll(".levelsterne").forEach((anzeige, index) => {
       const sterne = levelSterne(index + 1);
-      anzeige.textContent = "★".repeat(sterne) + "☆".repeat(3 - sterne);
+      const gesperrt = index > 0 && levelSterne(index) < 3;
+      anzeige.closest("button").disabled = gesperrt;
+      anzeige.textContent = gesperrt ? "🔒" : "★".repeat(sterne) + "☆".repeat(3 - sterne);
     });
-    document.getElementById("dachTitel").textContent = levelSterne(2) < 3
-      ? t("3 · Dachstrecke ausprobieren (Proberunde)") : t("3 · Über die Dächer zum Versteck");
+    document.getElementById("dachTitel").textContent = t("3 · Über die Dächer zum Versteck");
   }
   if (menue === ausstattung) zeichneVorschau();
   uebersetzeOberflaeche();
@@ -3792,9 +3802,10 @@ ausstattung.addEventListener("submit", (ereignis) => {
   zeigeMenue(hauptmenue);
 });
 function waehleLevel(nummer) {
+  if (nummer > 1 && levelSterne(nummer - 1) < 3) return;
   endlos = false;
   level = nummer;
-  proberunde = level === 3 && levelSterne(2) < 3;
+  proberunde = false;
   for (const knopf of schwierigkeitsmenue.querySelectorAll("[data-stufe]")) {
     const best = leseSterne(level, knopf.dataset.stufe);
     knopf.querySelector(".schwierigkeitssterne").textContent = "★".repeat(best) + "☆".repeat(3 - best);
@@ -3915,6 +3926,7 @@ document.getElementById("sprache").onchange=event=>{
   aktualisiereSprache();
 };
 aktualisiereSprache();
+ladeZufaelligenFussball();
 </script>
 </body>
 </html>
