@@ -3715,6 +3715,8 @@ function leseSterne(nummer, schwierigkeit) {
   try { return Math.max(0, Math.min(3, parseInt(localStorage.getItem("level" + nummer + "Sterne" + zusatz), 10) || 0)); }
   catch { return 0; }
 }
+// Voruebergehend zum Testen der fluessigen Darstellung. Danach wieder auf false setzen.
+const levelTestFreigabe = true;
 function levelSterne(nummer) {
   return Object.keys(sternZeiten).filter(stufe => leseSterne(nummer, stufe) > 0).length;
 }
@@ -3740,10 +3742,10 @@ function zeigeMenue(menue) {
   zeigeTageszeit();
   for (const seite of [ausstattung, faehigkeiten, hauptmenue, levelmenue, schwierigkeitsmenue, namenswahl, ruhm, coinShop]) seite.hidden = seite !== menue;
   if (menue === levelmenue) {
-    document.getElementById("endlosLevel").disabled = ![1,2,3].every(n => levelSterne(n) === 3);
+    document.getElementById("endlosLevel").disabled = !levelTestFreigabe && ![1,2,3].every(n => levelSterne(n) === 3);
     levelmenue.querySelectorAll(".levelsterne").forEach((anzeige, index) => {
       const sterne = levelSterne(index + 1);
-      const gesperrt = index > 0 && levelSterne(index) < 3;
+      const gesperrt = !levelTestFreigabe && index > 0 && levelSterne(index) < 3;
       anzeige.closest("button").disabled = gesperrt;
       anzeige.textContent = gesperrt ? "🔒" : "★".repeat(sterne) + "☆".repeat(3 - sterne);
     });
@@ -3759,7 +3761,7 @@ function zeichneVorschau() {
   zeichneRaeuber(pinsel, 57, 52, 7, charakterWahl.value, eigenerSkin());
 }
 document.getElementById("endlosLevel").onclick = () => {
-  if (![1,2,3].every(n => levelSterne(n) === 3)) return;
+  if (!levelTestFreigabe && ![1,2,3].every(n => levelSterne(n) === 3)) return;
   endlos = true;
   level = 2;
   proberunde = false;
@@ -3805,7 +3807,7 @@ ausstattung.addEventListener("submit", (ereignis) => {
   zeigeMenue(hauptmenue);
 });
 function waehleLevel(nummer) {
-  if (nummer > 1 && levelSterne(nummer - 1) < 3) return;
+  if (!levelTestFreigabe && nummer > 1 && levelSterne(nummer - 1) < 3) return;
   endlos = false;
   level = nummer;
   proberunde = false;
