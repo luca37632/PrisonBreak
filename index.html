@@ -196,9 +196,9 @@
       <h2>Gefängnis · Levelauswahl</h2>
       <button id="endlosLevel">∞ · Endlose Flucht · Distanzrekord</button>
       <p>Jede geschaffte Schwierigkeit bringt einen Levelstern.</p>
-      <button id="levelStart" class="levelwahl">1 · Aus der Zelle zum Innenhof <span class="levelsterne">☆☆☆</span></button>
-      <button id="levelZwei" class="levelwahl">2 · Zum Stadtrand <span class="levelsterne">☆☆☆</span></button>
-      <button id="levelDrei" class="levelwahl"><span id="dachTitel">3 · Über die Dächer zum Versteck</span><span class="levelsterne">☆☆☆</span></button>
+      <button id="levelStart" class="levelwahl">1 · Der Ausbruch <span class="levelsterne">☆☆☆</span></button>
+      <button id="levelZwei" class="levelwahl">2 · Die Stadt <span class="levelsterne">☆☆☆</span></button>
+      <button id="levelDrei" class="levelwahl"><span id="dachTitel">3 · Über die Dächer</span><span class="levelsterne">☆☆☆</span></button>
       <button id="zurueck">Zurück zum Hauptmenü</button>
     </section>
     <section class="menue" id="schwierigkeit" hidden>
@@ -283,11 +283,11 @@
       <button id="tastenFertig" type="button">Fertig</button>
     </dialog>
   </main>
-  <script src="spielerprofil.js?v=20261106-navigation"></script>
-  <script src="weitere-sprachen.js?v=20261106-navigation"></script>
-  <script src="sprache.js?v=20261106-navigation"></script>
-  <script src="fussball.js?v=20261106-navigation"></script>
-  <script src="steuerung.js?v=20261106-navigation"></script>
+  <script src="spielerprofil.js?v=20261106-levelnamen"></script>
+  <script src="weitere-sprachen.js?v=20261106-levelnamen"></script>
+  <script src="sprache.js?v=20261106-levelnamen"></script>
+  <script src="fussball.js?v=20261106-levelnamen"></script>
+  <script src="steuerung.js?v=20261106-levelnamen"></script>
   <script>
   const hofEbene = document.getElementById("spielhof");
   const spielfeld = document.querySelector("canvas");
@@ -3747,7 +3747,7 @@ function zeigeMenue(menue) {
       anzeige.closest("button").disabled = gesperrt;
       anzeige.textContent = gesperrt ? "🔒" : "★".repeat(sterne) + "☆".repeat(3 - sterne);
     });
-    document.getElementById("dachTitel").textContent = t("3 · Über die Dächer zum Versteck");
+    document.getElementById("dachTitel").textContent = t("3 · Über die Dächer");
   }
   if (menue === ausstattung) zeichneVorschau();
   uebersetzeOberflaeche();
