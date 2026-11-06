@@ -105,9 +105,9 @@
     #tastenOeffnen { margin-top: 12px; padding: 9px; width: 100%; color: var(--papier); background: #314754; border: 1px solid #82949c; border-radius: 6px; font: inherit; cursor: pointer; }
     #tastenDialog { width: min(720px, 92vw); position: fixed; color: #f8f4e9; background: linear-gradient(135deg,#233540,#142630); border-top-color: #ffba70; }
     #tastenDialog::backdrop { background: #101b26bb; }
-    .tastenZeile { display: grid; grid-template-columns: minmax(120px,1fr) 2fr; gap: 12px; align-items: center; padding: 8px 0; border-bottom: 1px solid #536773; }
-    .tastenKnoepfe { display: flex; gap: 8px; flex-wrap: wrap; }
-    .tastenKnoepfe span { display: flex; }
+    .tastenZeile { display: grid; grid-template-columns: 1fr; gap: 14px; align-items: center; padding: 18px 0; border-bottom: 1px solid #536773; }
+    .tastenKnoepfe { display: flex; gap: 16px 24px; flex-wrap: wrap; }
+    .tastenKnoepfe span { display: flex; gap: 6px; align-items: center; }
     #tastenDialog .tastenKnoepfe button { display: inline-block; width: auto; margin: 0; padding: 7px 10px; text-align: center; }
     #tastenDialog .tasteEntfernen { padding: 7px 5px; color: #ffc995; }
     #tastenMeldung { min-height: 1.4em; color: #ffc995; }
@@ -347,7 +347,7 @@ function meterText(pixel) { return (Math.max(0, pixel - 40) / 120).toFixed(1).re
 function endlosStufe() { return 1 + Math.floor(Math.max(0, endlosWeite - 40) / 2500); }
 function leseEndlosRekorde() {
   try {
-    const daten = JSON.parse(localStorage.getItem("endlosRekorde-v1") || "[]");
+    const daten = JSON.parse(localStorage.getItem("endlosRekorde-v2") || "[]");
     return Array.isArray(daten) ? profilRekorde(daten.filter(e => e && typeof e.name === "string" &&
       Number.isFinite(e.weite) && e.weite > 40 && Number.isFinite(e.zeit) && e.zeit >= 0)) : [];
   } catch { return []; }
@@ -360,7 +360,7 @@ function speichereEndlosRekord() {
   const weite = Math.round(endlosWeite * 10) / 10;
   if (!bisher) daten.push({ spielerId: spielerProfil.id, name: spielerName, weite, zeit });
   else if (weite > bisher.weite || (weite === bisher.weite && zeit < bisher.zeit)) Object.assign(bisher, { weite, zeit });
-  try { localStorage.setItem("endlosRekorde-v1", JSON.stringify(daten)); endlosGespeichert = true; } catch {}
+  try { localStorage.setItem("endlosRekorde-v2", JSON.stringify(daten)); endlosGespeichert = true; } catch {}
 }
 function erweitereEndlosStrecke() {
   while (endlosErzeugtBis < x + 2600) {

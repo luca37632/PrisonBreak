@@ -77,7 +77,7 @@ const sprachZeilen = [
   ["Name beibehalten oder deinen bisherigen Eintrag umbenennen?","¿Mantener tu nombre o renombrar tu entrada existente?","Garder ton nom ou renommer ton entrée existante ?"],
   ["Gib einen Namen für deine Rekorde ein.","Introduce un nombre para tus récords.","Saisis un nom pour tes records."], ["Bitte gib einen Spielernamen ein.","Introduce un nombre de jugador.","Saisis un nom de joueur."],
   ["/ Proberunde ohne Wertung","/ Práctica sin puntuación","/ Entraînement non classé"], ["/ Verfolgung","/ Persecución","/ Poursuite"],
-  ["Nach links","Mover a la izquierda","Aller à gauche"], ["Nach rechts","Mover a la derecha","Aller à droite"], ["Springen","Saltar","Sauter"], ["Ducken","Agacharse","S’accroupir"], ["Schloss / Geheimgang","Cerradura / Pasadizo secreto","Serrure / Passage secret"],
+  ["Nach links","Mover a la izquierda","Aller à gauche"], ["Nach rechts","Mover a la derecha","Aller à droite"], ["Springen","Saltar","Sauter"], ["Ducken","Agacharse","S’accroupir"], ["Schloss","Cerradura","Serrure"],
   ["Zurückspulen","Retroceder","Revenir en arrière"], ["Reserve-Rakete","Cohete de reserva","Fusée de réserve"], ["Spiel pausieren","Pausar partida","Mettre en pause"],
   ["Klicke auf eine Taste und drücke die gewünschte neue Taste. Escape bricht die Änderung ab.","Haz clic en un control y pulsa la nueva tecla. Escape cancela el cambio.","Clique sur une commande et appuie sur la nouvelle touche. Échap annule le changement."],
   ["Standardtasten wiederherstellen","Restablecer controles predeterminados","Rétablir les touches par défaut"], ["Fertig","Listo","Terminé"], ["Taste drücken …","Pulsa una tecla…","Appuie sur une touche…"],

@@ -81,7 +81,7 @@ const englischeTexte = {
   "Name beibehalten oder deinen bisherigen Eintrag umbenennen?": "Keep your name or rename your existing entry?",
   "Gib einen Namen für deine Rekorde ein.": "Enter a name for your records.", "Bitte gib einen Spielernamen ein.": "Please enter a player name.",
   "/ Proberunde ohne Wertung": "/ Unscored practice run", "/ Verfolgung": "/ Chase",
-  "Nach links": "Move left", "Nach rechts": "Move right", "Springen": "Jump", "Ducken": "Crouch", "Schloss / Geheimgang": "Lock / Secret passage",
+  "Nach links": "Move left", "Nach rechts": "Move right", "Springen": "Jump", "Ducken": "Crouch", "Schloss": "Lock",
   "Zurückspulen": "Rewind", "Reserve-Rakete": "Spare rocket", "Spiel pausieren": "Pause game",
   "Klicke auf eine Taste und drücke die gewünschte neue Taste. Escape bricht die Änderung ab.": "Click a binding and press the new key. Escape cancels the change.",
   "Standardtasten wiederherstellen": "Restore default keys", "Fertig": "Done", "Taste drücken …": "Press a key…",

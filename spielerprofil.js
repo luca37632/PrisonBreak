@@ -1,3 +1,8 @@
+// Neue Rangliste: alte Eintraege entfernen, neue Rekorde bleiben gespeichert.
+try {
+  localStorage.removeItem("endlosRekorde-v1");
+  localStorage.removeItem("hallOfFame-geheimwege1");
+} catch {}
 // Ein lokales Spielerprofil bleibt dasselbe, auch wenn sich der Name aendert.
 let spielerProfil;
 try { spielerProfil = JSON.parse(localStorage.getItem("spielerprofil-v1")); } catch {}
@@ -25,10 +30,10 @@ function profilUmbenennen(name) {
   try {
     localStorage.setItem("spielerprofil-v1", JSON.stringify(spielerProfil));
     localStorage.setItem("letzterSpielername", name);
-    const daten = JSON.parse(localStorage.getItem("endlosRekorde-v1") || "[]");
+    const daten = JSON.parse(localStorage.getItem("endlosRekorde-v2") || "[]");
     if (Array.isArray(daten)) {
       const gueltig = daten.filter(e => e && typeof e.name === "string" && Number.isFinite(e.weite) && Number.isFinite(e.zeit));
-      localStorage.setItem("endlosRekorde-v1", JSON.stringify(profilRekorde(gueltig)));
+      localStorage.setItem("endlosRekorde-v2", JSON.stringify(profilRekorde(gueltig)));
     }
   } catch { /* Der aktuelle Lauf funktioniert auch ohne Browserspeicher. */ }
 }

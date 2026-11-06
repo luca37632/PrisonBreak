@@ -3,7 +3,7 @@ const standardTasten = {
   ducken: ["ArrowDown", "KeyS"], interagieren: ["KeyE"], rueckspulen: ["KeyR"], rakete: ["KeyQ"], pause: ["Escape"]
 };
 const aktionsNamen = { links: "Nach links", rechts: "Nach rechts", springen: "Springen", ducken: "Ducken",
-  interagieren: "Schloss / Geheimgang", rueckspulen: "Zurückspulen", rakete: "Reserve-Rakete", pause: "Spiel pausieren" };
+  interagieren: "Schloss", rueckspulen: "Zurückspulen", rakete: "Reserve-Rakete", pause: "Spiel pausieren" };
 let tasten = structuredClone(standardTasten);
 try {
   const alt = JSON.parse(localStorage.getItem("tastenbelegung-v1"));
