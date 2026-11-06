@@ -112,6 +112,7 @@
     .tastenKnoepfe span { display: flex; gap: 6px; align-items: center; }
     #tastenDialog .tastenKnoepfe button { display: inline-block; width: auto; margin: 0; padding: 7px 10px; text-align: center; }
     #tastenDialog .tasteEntfernen { padding: 7px 5px; color: #ffc995; }
+    #endlosLevel:disabled::after { content: " 🔒"; float: right; }
     #tastenMeldung { min-height: 1.4em; color: #ffc995; }
   </style>
 </head>
@@ -282,11 +283,11 @@
       <button id="tastenFertig" type="button">Fertig</button>
     </dialog>
   </main>
-  <script src="spielerprofil.js?v=20261106-neustart"></script>
-  <script src="weitere-sprachen.js?v=20261106-neustart"></script>
-  <script src="sprache.js?v=20261106-neustart"></script>
-  <script src="fussball.js?v=20261106-neustart"></script>
-  <script src="steuerung.js?v=20261106-neustart"></script>
+  <script src="spielerprofil.js?v=20261106-navigation"></script>
+  <script src="weitere-sprachen.js?v=20261106-navigation"></script>
+  <script src="sprache.js?v=20261106-navigation"></script>
+  <script src="fussball.js?v=20261106-navigation"></script>
+  <script src="steuerung.js?v=20261106-navigation"></script>
   <script>
   const hofEbene = document.getElementById("spielhof");
   const spielfeld = document.querySelector("canvas");
@@ -3739,6 +3740,7 @@ function zeigeMenue(menue) {
   zeigeTageszeit();
   for (const seite of [ausstattung, faehigkeiten, hauptmenue, levelmenue, schwierigkeitsmenue, namenswahl, ruhm, coinShop]) seite.hidden = seite !== menue;
   if (menue === levelmenue) {
+    document.getElementById("endlosLevel").disabled = ![1,2,3].every(n => levelSterne(n) === 3);
     levelmenue.querySelectorAll(".levelsterne").forEach((anzeige, index) => {
       const sterne = levelSterne(index + 1);
       const gesperrt = index > 0 && levelSterne(index) < 3;
@@ -3757,6 +3759,7 @@ function zeichneVorschau() {
   zeichneRaeuber(pinsel, 57, 52, 7, charakterWahl.value, eigenerSkin());
 }
 document.getElementById("endlosLevel").onclick = () => {
+  if (![1,2,3].every(n => levelSterne(n) === 3)) return;
   endlos = true;
   level = 2;
   proberunde = false;
@@ -3927,6 +3930,24 @@ document.getElementById("sprache").onchange=event=>{
 };
 aktualisiereSprache();
 ladeZufaelligenFussball();
+// Pfeiltasten wechseln zwischen den sichtbaren Bedienelementen im aktuellen Menue.
+document.addEventListener("keydown", event => {
+  if (spielt || event.defaultPrevented || wartendeTaste || !["ArrowUp","ArrowDown","ArrowLeft","ArrowRight"].includes(event.key)) return;
+  const ziel = event.target;
+  if (ziel.closest("#spielPause,#namenswahl") && ["ArrowUp","ArrowDown"].includes(event.key)) return;
+  if (ziel.matches("select,input[type=range],input[type=radio]")) return;
+  if (ziel.matches("input") && ["ArrowLeft","ArrowRight"].includes(event.key)) return;
+  const bereich = ziel.closest("dialog[open],#einstellungen[open],.menue") ||
+    document.querySelector("dialog[open]") || [...document.querySelectorAll(".menue")].find(e=>e.getClientRects().length);
+  if (!bereich) return;
+  const felder = [...bereich.querySelectorAll("button,input,select,summary")].filter(e=>!e.disabled && e.getClientRects().length && e.tabIndex!==-1);
+  if (!felder.length) return;
+  const schritt = ["ArrowUp","ArrowLeft"].includes(event.key) ? -1 : 1;
+  const index = felder.indexOf(document.activeElement);
+  event.preventDefault();
+  const naechstes = felder[index<0 ? (schritt>0?0:felder.length-1) : (index+schritt+felder.length)%felder.length];
+  naechstes.focus();naechstes.scrollIntoView({block:"nearest",inline:"nearest"});
+}, true);
 </script>
 </body>
 </html>

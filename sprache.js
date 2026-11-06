@@ -127,8 +127,9 @@ function uebersetzeOberflaeche() {
   }
 }
 let panoramaDatei = "menue-rundfahrt.svg?v=20261106-neustart";
+let endlosDatei = "endloswelt.svg?v=20261106-navigation";
 let spielhofDatei = "spielhof.svg?v=20261106-neustart";
 function panoramaAdresse(ansicht = "menue") {
   const ziel = sprache !== "de" ? ansicht + "-" + sprache : ansicht === "menue" ? "" : ansicht;
-  return (ansicht === "spielhof" ? spielhofDatei : panoramaDatei) + (ziel ? "#"+ziel : "");
+  return (ansicht === "spielhof" ? spielhofDatei : ansicht === "endloswelt" ? endlosDatei : panoramaDatei) + (ziel ? "#"+ziel : "");
 }

@@ -85,6 +85,12 @@ async function ladeZufaelligenFussball() {
       mischeFussball(hof);
       spielhofDatei=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(hof)],{type:'image/svg+xml'}));
     }
+    const endlosAntwort=await fetch('endloswelt.svg?v=20261106-navigation');
+    if(endlosAntwort.ok){
+      const welt=new DOMParser().parseFromString(await endlosAntwort.text(),'image/svg+xml');
+      mischeFussball(welt);
+      endlosDatei=URL.createObjectURL(new Blob([new XMLSerializer().serializeToString(welt)],{type:'image/svg+xml'}));
+    }
     zeigeTageszeit();
     document.querySelector('#spielhof image')?.setAttribute('href',panoramaAdresse(endlos?'endloswelt':'spielhof'));
   } catch { /* Die vorbereitete SVG bleibt bei einem Ladefehler sichtbar. */ }
