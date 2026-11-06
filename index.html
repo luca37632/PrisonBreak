@@ -113,6 +113,12 @@
     #tastenDialog .tastenKnoepfe button { display: inline-block; width: auto; margin: 0; padding: 7px 10px; text-align: center; }
     #tastenDialog .tasteEntfernen { padding: 7px 5px; color: #ffc995; }
     #endlosLevel:disabled::after { content: " 🔒"; float: right; }
+    #namensEinstellungen { margin-top: 15px; padding-top: 4px; border-top: 1px solid #536773; }
+    #profilName { box-sizing: border-box; width: 100%; padding: 9px; color: var(--papier); background: #182a35; border: 1px solid #82949c; border-radius: 6px; font: inherit; }
+    #profilName:disabled { opacity: .7; }
+    #profilNameSpeichern { width: 100%; margin-top: 8px; padding: 9px; color: var(--papier); background: #314754; border: 1px solid #82949c; border-radius: 6px; font: inherit; cursor: pointer; }
+    #profilNameSpeichern:disabled { opacity: .5; cursor: default; }
+    #profilNameStatus { font: 12px/1.5 system-ui; color: #ffcf91; margin: 8px 0; }
     #tastenMeldung { min-height: 1.4em; color: #ffc995; }
   </style>
 </head>
@@ -128,6 +134,11 @@
         <strong>Einstellungen</strong>
         <label for="sprache">Sprache <select id="sprache"><option value="de">Deutsch</option><option value="en">English</option><option value="es">Español</option><option value="fr">Français</option></select></label>
         <button type="button" id="tastenOeffnen">Tastenbelegung</button>
+        <div id="namensEinstellungen">
+          <label for="profilName">Spielername <input id="profilName" type="text" maxlength="24" autocomplete="nickname" placeholder="Dein Name"></label>
+          <button id="profilNameSpeichern" type="button">Namen speichern</button>
+          <p id="profilNameStatus" role="status" data-i18n-dynamisch></p>
+        </div>
         <label for="nachtansicht">Nacht im Menü <input id="nachtansicht" type="checkbox"></label>
         <label for="menueSong">Menü-Song
           <select id="menueSong">
@@ -181,7 +192,6 @@
       <label for="spielername">Spielername</label>
       <input id="spielername" maxlength="24" required autocomplete="nickname" placeholder="Dein Name">
       <button type="submit">Mit diesem Namen starten</button>
-      <button type="button" id="neuerName">Neuen Namen eingeben</button>
       <button type="button" id="nameZurueck">Zurück</button>
     </form>
     <section class="menue" id="ruhm" hidden>
@@ -283,11 +293,11 @@
       <button id="tastenFertig" type="button">Fertig</button>
     </dialog>
   </main>
-  <script src="spielerprofil.js?v=20261106-levelnamen"></script>
-  <script src="weitere-sprachen.js?v=20261106-levelnamen"></script>
-  <script src="sprache.js?v=20261106-levelnamen"></script>
-  <script src="fussball.js?v=20261106-levelnamen"></script>
-  <script src="steuerung.js?v=20261106-levelnamen"></script>
+  <script src="spielerprofil.js?v=20261106-profile"></script>
+  <script src="weitere-sprachen.js?v=20261106-profile"></script>
+  <script src="sprache.js?v=20261106-profile"></script>
+  <script src="fussball.js?v=20261106-profile"></script>
+  <script src="steuerung.js?v=20261106-profile"></script>
   <script>
   const hofEbene = document.getElementById("spielhof");
   const spielfeld = document.querySelector("canvas");
@@ -459,9 +469,9 @@ const charakterWahl = document.getElementById("faehigkeiten").elements.namedItem
 const skinWahl = document.getElementById("faehigkeiten").elements.namedItem("skinTyp");
 const figurenSkins = {
   raeuber: { outfit: "raeuber", farbe: "#dc752e", haut: "#bb815b", frisur: "kurz", haare: "#382820", augen: "#46382f", bart: "ohne", schuhe: "#343b41", nummer: "17" },
-  springer: { outfit: "springer", farbe: "#218f85", haut: "#794c36", frisur: "lang", haare: "#261f25", augen: "#593e2e", bart: "ohne", schuhe: "#8df2d8", nummer: "28" },
-  zeit: { outfit: "zeit", farbe: "#655298", haut: "#deaf8b", frisur: "kurz", haare: "#cbc5bd", augen: "#537080", bart: "schnauzer", schuhe: "#403957", nummer: "03" },
-  ausdauer: { outfit: "ausdauer", farbe: "#a94149", haut: "#ac7351", frisur: "kahl", haare: "#503329", augen: "#413527", bart: "voll", schuhe: "#423430", nummer: "44" }
+  springer: { outfit: "springer", farbe: "#f2c84e", hose: "#243a59", haut: "#875538", frisur: "zopf", haare: "#282126", augen: "#573d2b", bart: "ohne", schuhe: "#f7f4df", nummer: "28", ausdruck: "grinsen" },
+  zeit: { outfit: "zeit", farbe: "#243552", hose: "#242738", haut: "#d5a680", frisur: "iro", haare: "#e5eaf3", augen: "#63e5f3", bart: "ohne", schuhe: "#65dfed", nummer: "03", ausdruck: "ernst" },
+  ausdauer: { outfit: "ausdauer", farbe: "#405a77", hose: "#293747", haut: "#a76c4b", frisur: "kurz", haare: "#493328", augen: "#413527", bart: "voll", schuhe: "#302f35", nummer: "44", ausdruck: "ernst" }
 };
 function eigenerSkin() {
   return { outfit: "raeuber", farbe: farbe.value, haut: haut.value, frisur: frisur.value, haare: haare.value,
@@ -1241,7 +1251,7 @@ function zeichneRaeuber(pinsel = stift, links = x, oben = y, massstab = figurMas
   for (const [huefte, seite] of [[8, -1], [16, 1]]) {
     let fussX = huefte + schritt * seite * 4;
     let fussY = 34 - Math.max(0, schritt * seite) * 3;
-    pinsel.strokeStyle = skin.farbe;
+    pinsel.strokeStyle = skin.hose || skin.farbe;
     pinsel.lineWidth = 5;
     pinsel.beginPath();
     if (rutscht) {
@@ -1266,7 +1276,7 @@ function zeichneRaeuber(pinsel = stift, links = x, oben = y, massstab = figurMas
     pinsel.fillStyle = skin.schuhe;
     oval(fussX + 1, fussY, 3.5, 1.8, skin.schuhe, pinsel);
     if (outfit === "springer") {
-      pinsel.fillStyle = "#60dec5";
+      pinsel.fillStyle = "#e9b838";
       pinsel.fillRect(fussX - 2, fussY - 3, 4, 2);
       pinsel.fillRect(fussX - 2, fussY + 1, 7, 1);
     }
@@ -1279,6 +1289,16 @@ function zeichneRaeuber(pinsel = stift, links = x, oben = y, massstab = figurMas
   }
   // Gesicht, Haare und Augen aus der Figurenauswahl
   oval(11.8, 17.3, 6.1, 8, skin.farbe, pinsel);
+  if (outfit === "springer") {
+    pinsel.fillStyle = "#fff4c9";pinsel.fillRect(8, 12, 2, 10);pinsel.fillRect(15, 12, 2, 10);
+  } else if (outfit === "ausdauer") {
+    oval(12, 17.8, 7, 7.2, "#d78343", pinsel);
+    pinsel.fillStyle = "#5c4439";pinsel.fillRect(5.5, 21, 13, 2);
+    pinsel.fillStyle = "#f6cc84";pinsel.fillRect(6.5, 16, 3, 4);pinsel.fillRect(14.5, 16, 3, 4);
+  } else if (outfit === "zeit") {
+    pinsel.strokeStyle = "#65dfed";pinsel.lineWidth = 1;
+    pinsel.beginPath();pinsel.moveTo(7,12);pinsel.lineTo(9,22);pinsel.lineTo(17,22);pinsel.lineTo(18,15);pinsel.stroke();
+  }
   oval(12, 10, 2.7, 3.2, skin.haut, pinsel);
   pinsel.save();
   if (tief) {
@@ -1319,6 +1339,9 @@ function zeichneRaeuber(pinsel = stift, links = x, oben = y, massstab = figurMas
       pinsel.fillRect(4.8, 3.8, 2.5, 1.2);
     }
   }
+  if (outfit === "springer") {
+    pinsel.strokeStyle="#2c5266";pinsel.lineWidth=1.6;pinsel.beginPath();pinsel.moveTo(6.5,2.2);pinsel.quadraticCurveTo(12,1.2,18,2.9);pinsel.stroke();
+  }
   oval(15.2, 5, 2, 1.3, "#fffcf0", pinsel);
   oval(16, 5, 0.95, 1.15, skin.augen, pinsel);
   if (skin.bart === "voll") {
@@ -1353,6 +1376,11 @@ function zeichneRaeuber(pinsel = stift, links = x, oben = y, massstab = figurMas
     oval(15.2, 5, 2.1, 1.9, "#fffcf0", pinsel);
     oval(16, 5, 0.8, 1, skin.augen, pinsel);
     oval(15.5, 10, 1.1, 1.4, "#563732", pinsel);
+  }
+  if (outfit === "zeit") {
+    pinsel.fillStyle="#182b43";pinsel.fillRect(12,3,7,4);
+    pinsel.fillStyle="#6aebf5";pinsel.fillRect(13,3.7,5,2.2);
+    pinsel.strokeStyle="#3b5972";pinsel.lineWidth=1;pinsel.beginPath();pinsel.moveTo(7,4);pinsel.lineTo(12,4);pinsel.stroke();
   }
   pinsel.restore();
   // Weißes Nummernschild auf dem Overall
@@ -1411,11 +1439,11 @@ function zeichneRaeuber(pinsel = stift, links = x, oben = y, massstab = figurMas
     oval(hand, handY, 1.7, 1.8, skin.haut, pinsel);
     if (outfit === "zeit" && seite === 1) {
       oval(hand, handY - 1, 2.6, 2.6, "#374455", pinsel);
-      oval(hand, handY - 1, 1.9, 1.9, "#ffe283", pinsel);
+      oval(hand, handY - 1, 1.9, 1.9, "#65dfed", pinsel);
       pinsel.fillStyle = "#374455";
       pinsel.fillRect(hand, handY - 2.5, 0.6, 1.6);
     }
-    if (outfit === "ausdauer") oval(schulter, 14, 3.6, 2.5, "#566a79", pinsel);
+    if (outfit === "ausdauer") oval(schulter, 14, 3.6, 2.5, "#e19a56", pinsel);
   }
   pinsel.restore();
 }
@@ -3596,7 +3624,7 @@ document.getElementById("zuShop").onclick = () => { aktualisiereShop(); zeigeMen
 document.getElementById("shopZurueck").onclick = () => zeigeMenue(hauptmenue);
 let spielerName = spielerProfil.name || "";
 let geplanterStart = null;
-try { spielerName = localStorage.getItem("letzterSpielername") || ""; } catch {}
+
 function leseRuhm() {
   try {
     const daten = JSON.parse(localStorage.getItem("hallOfFame-geheimwege1") || "[]");
@@ -3649,6 +3677,7 @@ function aktualisiereNamenshinweis() {
     ? t("Name beibehalten oder deinen bisherigen Eintrag umbenennen?") : t("Gib einen Namen für deine Rekorde ein."));
 }
 function frageSpieler(gewaehlteStufe) {
+  if (spielerName) { geplanterStart = null; starteLevel(gewaehlteStufe); return; }
   geplanterStart = { stufe: gewaehlteStufe, endlos, level };
   document.getElementById("spielername").value = spielerName;
   aktualisiereNamenshinweis();
@@ -3661,8 +3690,9 @@ namenswahl.onsubmit = event => {
   const name = feld.value.trim().replace(/\s+/g, " ").slice(0, 24);
   if (!name) { feld.setCustomValidity(t("Bitte gib einen Spielernamen ein.")); feld.reportValidity(); return; }
   if (!geplanterStart) return;
-  spielerName = name;
-  profilUmbenennen(name);
+  if (!profilUmbenennen(name)) { feld.setCustomValidity(t("Dein Name kann noch nicht geändert werden.")); feld.reportValidity(); return; }
+  spielerName = spielerProfil.name;
+  aktualisiereProfilEinstellungen();
   const start = geplanterStart;
   geplanterStart = null;
   endlos = start.endlos;
@@ -3679,9 +3709,6 @@ namenswahl.addEventListener("keydown", event => {
   const richtung = event.key === "ArrowDown" ? 1 : -1;
   felder[(index + richtung + felder.length) % felder.length].focus();
 });
-document.getElementById("neuerName").onclick = () => {
-  const feld = document.getElementById("spielername"); feld.value = ""; feld.setCustomValidity(""); feld.focus();
-};
 document.getElementById("nameZurueck").onclick = () => { geplanterStart = null; zeigeMenue(endlos ? hauptmenue : schwierigkeitsmenue); };
 document.getElementById("zuRuhm").onclick = zeigeRuhm;
 document.getElementById("ruhmZurueck").onclick = () => zeigeMenue(hauptmenue);
@@ -3909,7 +3936,35 @@ if (location.hash === "#levelauswahl") {
 }
 zeichneFigur();
 
+function aktualisiereProfilEinstellungen() {
+  const feld = document.getElementById("profilName");
+  if (document.activeElement !== feld) feld.value = spielerName;
+  const gesperrt = !darfNameAendern();
+  feld.disabled = gesperrt;
+  document.getElementById("profilNameSpeichern").disabled = gesperrt || !feld.value.trim() || feld.value.trim() === spielerName;
+  const datum = new Date(naechsteNamensaenderung()).toLocaleString(sprache, {dateStyle:"medium",timeStyle:"short"});
+  document.getElementById("profilNameStatus").textContent = gesperrt
+    ? t("Nächste Namensänderung ab {datum}.", {datum})
+    : t("Du kannst deinen Namen alle 14 Tage ändern.");
+}
+document.getElementById("profilName").addEventListener("input", aktualisiereProfilEinstellungen);
+document.getElementById("profilNameSpeichern").onclick = () => {
+  if (profilUmbenennen(document.getElementById("profilName").value)) {
+    spielerName = spielerProfil.name;
+    document.getElementById("profilName").value = spielerName;
+    if (!ruhm.hidden) zeigeRuhm();
+  }
+  aktualisiereProfilEinstellungen();
+};
+document.getElementById("profilName").addEventListener("keydown", event => {
+  if (event.key === "Enter") { event.preventDefault(); document.getElementById("profilNameSpeichern").click(); }
+});
+document.getElementById("einstellungen").addEventListener("toggle", () => {
+  if (document.getElementById("einstellungen").open) aktualisiereProfilEinstellungen();
+});
+
 function aktualisiereSprache() {
+  aktualisiereProfilEinstellungen();
   document.getElementById("sprache").value=sprache;
   uebersetzeOberflaeche();zeigeTageszeit();
   document.getElementById("menueCoins").textContent = "◉ " + coinKonto.coins + " " + t("Coins");

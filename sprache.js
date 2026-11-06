@@ -3,6 +3,10 @@ let sprache = "de";
 const spielSprachen = ["de", "en", "es", "fr"];
 try { const gespeichert = localStorage.getItem("sprache"); if (spielSprachen.includes(gespeichert)) sprache = gespeichert; } catch {}
 const englischeTexte = {
+  "Namen speichern": "Save name",
+  "Du kannst deinen Namen alle 14 Tage ändern.": "You can change your name every 14 days.",
+  "Nächste Namensänderung ab {datum}.": "Next name change available from {datum}.",
+  "Dein Name kann noch nicht geändert werden.": "You cannot change your name yet.",
   "Coins": "Coins", "Level": "Level", "Cafeteria": "Cafeteria", "Hall of Fame": "Hall of Fame",
   "Einstellungen": "Settings", "Sprache": "Language", "Tastenbelegung": "Keybinds",
   "Stadtgroove · Disco": "City Groove · Disco", "Skyline · House": "Skyline · House", "Fluchtplan · Synthwave": "Escape Plan · Synthwave",

@@ -93,3 +93,16 @@ const weitereUebersetzungen = {
 };
 Object.assign(weitereUebersetzungen.es, { Coins: "Monedas", Level: "Nivel", Cafeteria: "Cafetería", "Hall of Fame": "Salón de la fama" });
 Object.assign(weitereUebersetzungen.fr, { Coins: "Pièces", Level: "Niveau", Cafeteria: "Cafétéria", "Hall of Fame": "Palmarès" });
+
+Object.assign(weitereUebersetzungen.es, {
+  "Namen speichern": "Guardar nombre",
+  "Du kannst deinen Namen alle 14 Tage ändern.": "Puedes cambiar tu nombre cada 14 días.",
+  "Nächste Namensänderung ab {datum}.": "Próximo cambio de nombre a partir del {datum}.",
+  "Dein Name kann noch nicht geändert werden.": "Todavía no puedes cambiar tu nombre."
+});
+Object.assign(weitereUebersetzungen.fr, {
+  "Namen speichern": "Enregistrer le nom",
+  "Du kannst deinen Namen alle 14 Tage ändern.": "Tu peux changer de nom tous les 14 jours.",
+  "Nächste Namensänderung ab {datum}.": "Prochain changement de nom à partir du {datum}.",
+  "Dein Name kann noch nicht geändert werden.": "Tu ne peux pas encore changer de nom."
+});

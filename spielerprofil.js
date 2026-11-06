@@ -24,6 +24,12 @@ if (!spielerProfil || typeof spielerProfil.id !== "string") {
     name: letzterName, namen: letzterName ? [letzterName] : [] };
 }
 if (!Array.isArray(spielerProfil.namen)) spielerProfil.namen = [spielerProfil.name].filter(Boolean);
+const namensWartezeit = 14 * 24 * 60 * 60 * 1000;
+function naechsteNamensaenderung() {
+  const letzte = Number(spielerProfil.nameGeaendertAm);
+  return spielerProfil.name && Number.isFinite(letzte) && letzte > 0 ? letzte + namensWartezeit : 0;
+}
+function darfNameAendern(jetzt = Date.now()) { return jetzt >= naechsteNamensaenderung(); }
 function profilRekorde(daten) {
   const namen = new Set(spielerProfil.namen.map(n => n.toLocaleLowerCase()));
   const fremde = [], eigene = [];
@@ -36,7 +42,12 @@ function profilRekorde(daten) {
   return fremde;
 }
 function profilUmbenennen(name) {
+  name = String(name).trim().replace(/\s+/g, " ").slice(0,24);
+  if (!name) return false;
+  if (name === spielerProfil.name) return true;
+  if (!darfNameAendern()) return false;
   spielerProfil.name = name;
+  spielerProfil.nameGeaendertAm = Date.now();
   if (!spielerProfil.namen.includes(name)) spielerProfil.namen.push(name);
   try {
     localStorage.setItem("spielerprofil-v1", JSON.stringify(spielerProfil));
@@ -47,5 +58,6 @@ function profilUmbenennen(name) {
       localStorage.setItem("endlosRekorde-v2", JSON.stringify(profilRekorde(gueltig)));
     }
   } catch { /* Der aktuelle Lauf funktioniert auch ohne Browserspeicher. */ }
+  return true;
 }
 try { localStorage.setItem("spielerprofil-v1", JSON.stringify(spielerProfil)); } catch {}
