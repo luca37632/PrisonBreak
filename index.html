@@ -3715,8 +3715,8 @@ function leseSterne(nummer, schwierigkeit) {
   try { return Math.max(0, Math.min(3, parseInt(localStorage.getItem("level" + nummer + "Sterne" + zusatz), 10) || 0)); }
   catch { return 0; }
 }
-// Voruebergehend zum Testen der fluessigen Darstellung. Danach wieder auf false setzen.
-const levelTestFreigabe = true;
+// Die regulaeren Freischaltregeln sind aktiv.
+const levelTestFreigabe = false;
 function levelSterne(nummer) {
   return Object.keys(sternZeiten).filter(stufe => leseSterne(nummer, stufe) > 0).length;
 }
