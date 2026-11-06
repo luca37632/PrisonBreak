@@ -3748,12 +3748,12 @@ function leseSterne(nummer, schwierigkeit) {
 // Die regulaeren Freischaltregeln sind aktiv.
 const levelTestFreigabe = false;
 function levelSterne(nummer) {
-  return Object.keys(sternZeiten).filter(stufe => leseSterne(nummer, stufe) > 0).length;
+  return Object.keys(sternZeiten).filter(stufe => leseSterne(nummer, stufe) === 3).length;
 }
 const freischaltLevel = { raeuber: 0, springer: 1, ausdauer: 2, zeit: 3 };
 for (const option of charakterWahl) {
   const nummer = freischaltLevel[option.value];
-  option.disabled = nummer > 0 && !levelSterne(nummer) && !leseSterne(nummer);
+  option.disabled = nummer > 0 && !Object.keys(sternZeiten).some(stufe => leseSterne(nummer, stufe) > 0) && !leseSterne(nummer);
   option.closest("label").querySelector("small").textContent = nummer === 0 ? t("Von Anfang an verfügbar") :
     option.disabled ? t("Schaffe Level ") + nummer : t("Freigeschaltet nach Level ") + nummer;
 }
