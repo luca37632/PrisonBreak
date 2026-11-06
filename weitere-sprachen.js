@@ -106,3 +106,6 @@ Object.assign(weitereUebersetzungen.fr, {
   "Nächste Namensänderung ab {datum}.": "Prochain changement de nom à partir du {datum}.",
   "Dein Name kann noch nicht geändert werden.": "Tu ne peux pas encore changer de nom."
 });
+
+weitereUebersetzungen.es["Name ist schon vergeben"] = "El nombre ya está en uso";
+weitereUebersetzungen.fr["Name ist schon vergeben"] = "Ce nom est déjà pris";

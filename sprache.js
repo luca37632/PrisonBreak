@@ -3,6 +3,7 @@ let sprache = "de";
 const spielSprachen = ["de", "en", "es", "fr"];
 try { const gespeichert = localStorage.getItem("sprache"); if (spielSprachen.includes(gespeichert)) sprache = gespeichert; } catch {}
 const englischeTexte = {
+  "Name ist schon vergeben": "Name is already taken",
   "Namen speichern": "Save name",
   "Du kannst deinen Namen alle 14 Tage ändern.": "You can change your name every 14 days.",
   "Nächste Namensänderung ab {datum}.": "Next name change available from {datum}.",

@@ -116,6 +116,7 @@
     #namensEinstellungen { margin-top: 15px; padding-top: 4px; border-top: 1px solid #536773; }
     #profilName { box-sizing: border-box; width: 100%; padding: 9px; color: var(--papier); background: #182a35; border: 1px solid #82949c; border-radius: 6px; font: inherit; }
     #profilName:disabled { opacity: .7; }
+    #spielername.namensfehler, #profilName.namensfehler { color: #ff7979; border-color: #ff7979; }
     #profilNameSpeichern { width: 100%; margin-top: 8px; padding: 9px; color: var(--papier); background: #314754; border: 1px solid #82949c; border-radius: 6px; font: inherit; cursor: pointer; }
     #profilNameSpeichern:disabled { opacity: .5; cursor: default; }
     #profilNameStatus { font: 12px/1.5 system-ui; color: #ffcf91; margin: 8px 0; }
@@ -293,11 +294,11 @@
       <button id="tastenFertig" type="button">Fertig</button>
     </dialog>
   </main>
-  <script src="spielerprofil.js?v=20261106-profile"></script>
-  <script src="weitere-sprachen.js?v=20261106-profile"></script>
-  <script src="sprache.js?v=20261106-profile"></script>
-  <script src="fussball.js?v=20261106-profile"></script>
-  <script src="steuerung.js?v=20261106-profile"></script>
+  <script src="spielerprofil.js?v=20261106-namenspruefung"></script>
+  <script src="weitere-sprachen.js?v=20261106-namenspruefung"></script>
+  <script src="sprache.js?v=20261106-namenspruefung"></script>
+  <script src="fussball.js?v=20261106-namenspruefung"></script>
+  <script src="steuerung.js?v=20261106-namenspruefung"></script>
   <script>
   const hofEbene = document.getElementById("spielhof");
   const spielfeld = document.querySelector("canvas");
@@ -3687,9 +3688,11 @@ function frageSpieler(gewaehlteStufe) {
 namenswahl.onsubmit = event => {
   event.preventDefault();
   const feld = document.getElementById("spielername");
+  if (feld.dataset.namensfehler) return;
   const name = feld.value.trim().replace(/\s+/g, " ").slice(0, 24);
   if (!name) { feld.setCustomValidity(t("Bitte gib einen Spielernamen ein.")); feld.reportValidity(); return; }
   if (!geplanterStart) return;
+  if (istNameVergeben(name)) { zeigeNamensfehler(feld); return; }
   if (!profilUmbenennen(name)) { feld.setCustomValidity(t("Dein Name kann noch nicht geändert werden.")); feld.reportValidity(); return; }
   spielerName = spielerProfil.name;
   aktualisiereProfilEinstellungen();
@@ -3936,12 +3939,31 @@ if (location.hash === "#levelauswahl") {
 }
 zeichneFigur();
 
-function aktualisiereProfilEinstellungen() {
+function zeigeNamensfehler(feld) {
+  if (feld.dataset.namensfehler) return;
+  const eingabe = feld.value;
+  const warReadOnly = feld.readOnly;
+  feld.dataset.namensfehler = "ja";
+  feld.readOnly = true;
+  feld.classList.add("namensfehler");
+  feld.setAttribute("aria-invalid", "true");
+  feld.value = t("Name ist schon vergeben");
+  if (feld.id === "profilName") aktualisiereProfilEinstellungen();
+  setTimeout(() => {
+    delete feld.dataset.namensfehler;
+    feld.readOnly = warReadOnly;
+    feld.classList.remove("namensfehler");
+    feld.removeAttribute("aria-invalid");
+    feld.value = eingabe;
+    if (feld.id === "profilName") aktualisiereProfilEinstellungen(true);
+  }, 3000);
+}
+function aktualisiereProfilEinstellungen(eingabeBehalten = false) {
   const feld = document.getElementById("profilName");
-  if (document.activeElement !== feld) feld.value = spielerName;
+  if (!eingabeBehalten && !feld.dataset.namensfehler && document.activeElement !== feld) feld.value = spielerName;
   const gesperrt = !darfNameAendern();
   feld.disabled = gesperrt;
-  document.getElementById("profilNameSpeichern").disabled = gesperrt || !feld.value.trim() || feld.value.trim() === spielerName;
+  document.getElementById("profilNameSpeichern").disabled = gesperrt || !!feld.dataset.namensfehler || !feld.value.trim() || feld.value.trim() === spielerName;
   const datum = new Date(naechsteNamensaenderung()).toLocaleString(sprache, {dateStyle:"medium",timeStyle:"short"});
   document.getElementById("profilNameStatus").textContent = gesperrt
     ? t("Nächste Namensänderung ab {datum}.", {datum})
@@ -3949,6 +3971,9 @@ function aktualisiereProfilEinstellungen() {
 }
 document.getElementById("profilName").addEventListener("input", aktualisiereProfilEinstellungen);
 document.getElementById("profilNameSpeichern").onclick = () => {
+  const feld = document.getElementById("profilName");
+  if (feld.dataset.namensfehler) return;
+  if (darfNameAendern() && istNameVergeben(feld.value)) { zeigeNamensfehler(feld); return; }
   if (profilUmbenennen(document.getElementById("profilName").value)) {
     spielerName = spielerProfil.name;
     document.getElementById("profilName").value = spielerName;

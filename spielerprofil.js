@@ -30,6 +30,20 @@ function naechsteNamensaenderung() {
   return spielerProfil.name && Number.isFinite(letzte) && letzte > 0 ? letzte + namensWartezeit : 0;
 }
 function darfNameAendern(jetzt = Date.now()) { return jetzt >= naechsteNamensaenderung(); }
+function namensSchluessel(name) {
+  return String(name).normalize("NFKC").trim().replace(/\s+/g, " ").toLowerCase();
+}
+function istNameVergeben(name) {
+  const gesucht = namensSchluessel(name);
+  if (!gesucht) return false;
+  const eigeneNamen = new Set(spielerProfil.namen.map(namensSchluessel));
+  try {
+    const daten = JSON.parse(localStorage.getItem("endlosRekorde-v2") || "[]");
+    return Array.isArray(daten) && daten.some(e => e && typeof e.name === "string" &&
+      namensSchluessel(e.name) === gesucht && e.spielerId !== spielerProfil.id &&
+      (e.spielerId || !eigeneNamen.has(namensSchluessel(e.name))));
+  } catch { return false; }
+}
 function profilRekorde(daten) {
   const namen = new Set(spielerProfil.namen.map(n => n.toLocaleLowerCase()));
   const fremde = [], eigene = [];
@@ -46,6 +60,7 @@ function profilUmbenennen(name) {
   if (!name) return false;
   if (name === spielerProfil.name) return true;
   if (!darfNameAendern()) return false;
+  if (istNameVergeben(name)) return false;
   spielerProfil.name = name;
   spielerProfil.nameGeaendertAm = Date.now();
   if (!spielerProfil.namen.includes(name)) spielerProfil.namen.push(name);
