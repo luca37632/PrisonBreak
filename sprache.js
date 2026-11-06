@@ -39,7 +39,7 @@ const englischeTexte = {
   "Platz": "Rank", "Spieler": "Player", "Entfernung": "Distance", "Platz frei": "Empty place",
   "Fluchtplan / Welt 01": "Escape plan / World 01", "Gefängnis · Levelauswahl": "Prison · Level selection",
   "∞ · Endlose Flucht · Distanzrekord": "∞ · Endless Escape · Distance record",
-  "Jede geschaffte Schwierigkeit bringt einen Levelstern.": "Completing each difficulty earns one level star.",
+  "Mit 3 Sternen schaltest du das nächste Level frei.": "Earn 3 stars to unlock the next level.",
   "1 · Der Ausbruch": "1 · The Breakout", "2 · Die Stadt": "2 · The City",
   "3 · Dachstrecke ausprobieren": "3 · Try the rooftops", "3 · Dachstrecke ausprobieren (Proberunde)": "3 · Try the rooftops (practice run)",
   "3 · Über die Dächer": "3 · Over the Rooftops", "Zurück zum Hauptmenü": "Back to the main menu",

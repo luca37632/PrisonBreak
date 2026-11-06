@@ -30,7 +30,7 @@ const sprachZeilen = [
   ["Platz","Puesto","Rang"], ["Spieler","Jugador","Joueur"], ["Entfernung","Distancia","Distance"], ["Platz frei","Puesto libre","Place libre"],
   ["Fluchtplan / Welt 01","Plan de fuga / Mundo 01","Plan d’évasion / Monde 01"], ["Gefängnis · Levelauswahl","Prisión · Elegir nivel","Prison · Choix du niveau"],
   ["∞ · Endlose Flucht · Distanzrekord","∞ · Fuga sin fin · Récord de distancia","∞ · Évasion sans fin · Record de distance"],
-  ["Jede geschaffte Schwierigkeit bringt einen Levelstern.","Completar cada dificultad otorga una estrella de nivel.","Terminer chaque difficulté rapporte une étoile de niveau."],
+  ["Mit 3 Sternen schaltest du das nächste Level frei.","Consigue 3 estrellas para desbloquear el siguiente nivel.","Obtiens 3 étoiles pour débloquer le niveau suivant."],
   ["1 · Der Ausbruch","1 · La fuga","1 · L’évasion"], ["2 · Die Stadt","2 · La ciudad","2 · La ville"],
   ["3 · Dachstrecke ausprobieren","3 · Probar los tejados","3 · Essayer les toits"], ["3 · Dachstrecke ausprobieren (Proberunde)","3 · Probar los tejados (práctica)","3 · Essayer les toits (entraînement)"],
   ["3 · Über die Dächer","3 · Por los tejados","3 · Par les toits"], ["Zurück zum Hauptmenü","Volver al menú principal","Retour au menu principal"],
